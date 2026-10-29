@@ -27,9 +27,29 @@
     }
   });
 
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'none';
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-reveal]').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1)';
+      io.observe(el);
+    });
+  }
+
   var input = document.getElementById('suburb-search-input');
   var results = document.getElementById('suburb-search-results');
-  var form = document.getElementById('suburb-search');
+  var form = document.getElementById('search');
   if (!input || !results || !form) return;
   var DATA = null;
   fetch('/assets/suburbs.json').then(function(r){ return r.json(); }).then(function(j){ DATA = j; });

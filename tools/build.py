@@ -109,9 +109,11 @@ def esc(s):
 
 
 NAV_LINKS = [
-    ("Repair services", "/#repairs"),
-    ("All suburbs", "/#suburbs"),
-    ("List your shop", "/list-your-shop/"),
+    ("Repairs", "/#repairs"),
+    ("Suburbs", "/#suburbs"),
+    ("iPhone", "/#repairs"),
+    ("Samsung", "/#repairs"),
+    ("For shops", "#"),
 ]
 
 
@@ -147,8 +149,11 @@ def header_html():
     return f"""<header class="site-header">
   <nav class="nav-wrap" aria-label="Primary">
     <a href="/" class="brand"><span class="brand-mark">P</span><span>phonerepair<span class="muted">nearme</span></span></a>
-    <button class="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">&#9776;</button>
     <div class="nav-links" id="nav-links">{links}</div>
+    <div class="nav-right">
+      <a class="btn-primary btn-pill" href="/#search">Find a repairer</a>
+      <button class="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    </div>
   </nav>
 </header>
 """
@@ -159,11 +164,11 @@ def footer_html():
         ("Repairs", [(s['name'], f"/{s['slug']}/") for s in D.SERVICES]),
         ("Brands", [(b, "/#repairs") for b in D.BRANDS]),
         ("Regions", [(r, f"/{REGION_SLUG[r]}/") for r in D.REGIONS[:6]]),
-        ("Company", [("About", "/about/"), ("List your shop", "/list-your-shop/"), ("Contact", "/contact/"), ("Privacy", "/privacy/")]),
+        ("Company", [("About", None), ("List your shop", None), ("Contact", None), ("Privacy", None)]),
     ]
     cols_html = ""
     for title, items in cols:
-        li = "".join(f'<li><a href="{href}">{esc(label)}</a></li>' for label, href in items)
+        li = "".join(f'<li><a href="{href or "#"}">{esc(label)}</a></li>' for label, href in items)
         cols_html += f'<div><h4>{esc(title)}</h4><ul>{li}</ul></div>'
     return f"""<footer class="site-footer">
   <div class="wrap">
@@ -234,7 +239,7 @@ def shop_card_html(shop, dist, rank, suburb_name):
         call_html = f'<a class="btn-primary" href="tel:{shop["phone"].replace(" ", "")}">Call {esc(shop["phone"])}</a>'
     else:
         call_html = f'<a class="btn-primary" href="{shop["url"]}" target="_blank" rel="noopener">Store info</a>'
-    return f"""<article class="shop-card">
+    return f"""<article class="shop-card" data-reveal="1">
   <div class="shop-head">
     <div class="shop-rank">{rank}</div>
     <div class="shop-main">
@@ -277,13 +282,6 @@ def build_suburb_page(suburb):
     nearest_dist, nearest_shop = ranked[0]
     cards = "\n".join(shop_card_html(sh, d, i + 1, suburb['name']) for i, (d, sh) in enumerate(ranked))
 
-    far_notice = ""
-    if nearest_dist > 15:
-        far_notice = f"""<div class="notice">
-  <p>No repairer is listed within easy reach of {esc(suburb['name'])} yet — the closest currently listed store is <strong>{esc(nearest_shop['name'])}</strong>, about {nearest_dist:.0f}&nbsp;km away.</p>
-  <p>Run a repair shop near {esc(suburb['name'])}? <a href="/list-your-shop/">List it here</a> so local customers can find you.</p>
-</div>"""
-
     same_region = [s for s in D.SUBURBS if s['region'] == suburb['region'] and s['id'] != suburb['id']]
     same_region.sort(key=lambda s: abs(int(s['postcode']) - int(suburb['postcode'])))
     nearby = same_region[:12]
@@ -324,9 +322,11 @@ def build_suburb_page(suburb):
   <h1>Phone repair in {esc(suburb['name'])}.</h1>
   <p class="lede">{len(D.SHOPS)} repair stores ranked by distance from {esc(suburb['name'])}. Check who's open, then call or get directions.</p>
 </section>
-<section class="wrap narrow">
-  {far_notice}
+<section class="wrap narrow suburb-shops">
   <div class="shop-list">{cards}</div>
+  <aside class="map-aside">
+    <div class="image-slot">Map of repairers near {esc(suburb['name'])}</div>
+  </aside>
 </section>
 <section class="band-light">
   <div class="wrap narrow two-col">
@@ -408,14 +408,14 @@ def build_home():
     service_cards = ""
     for s in D.SERVICES:
         price_label = f"From ${s['price']}" if s['price'] else "Free diagnosis"
-        service_cards += f"""<a class="service-card" href="/{s['slug']}/">
+        service_cards += f"""<a class="service-card" data-reveal="1" href="/{s['slug']}/">
   <span class="eyebrow">{esc(s['tag'])}</span>
   <h2>{esc(s['name'])}</h2>
   <p>{esc(s['desc'])}</p>
   <span class="price">{price_label}</span>
 </a>"""
     region_cards = "".join(
-        f'<a class="region-card" href="/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
+        f'<a class="region-card" data-reveal="1" href="/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
         for r in D.REGIONS
     )
     faq_html = "".join(f"""<details class="faq">
@@ -441,38 +441,39 @@ def build_home():
   <p class="eyebrow">Every Sydney suburb. One search.</p>
   <h1>Phone repair.<br>Near you. Today.</h1>
   <p class="lede">Compare trusted local repairers for cracked screens, tired batteries and everything in between.</p>
-  <form class="search-form" id="suburb-search" role="search">
+  <form class="search-form" id="search" role="search">
     <input type="search" id="suburb-search-input" placeholder="Enter your suburb or postcode" aria-label="Suburb or postcode" autocomplete="off">
     <button type="submit">Search</button>
     <div id="suburb-search-results" class="search-results" hidden></div>
   </form>
   <p class="quick-links"><a href="#repairs">Browse repairs &rsaquo;</a> <a href="#suburbs">All suburbs &rsaquo;</a></p>
+  <div class="hero-image"><div class="image-slot">Hero image &mdash; phone being repaired, shot from above</div></div>
 </section>
 
 <section id="repairs" class="band-light">
   <div class="wrap">
-    <h2>Whatever broke,<br><span class="muted">someone nearby fixes it.</span></h2>
+    <h2 data-reveal="1">Whatever broke,<br><span class="muted">someone nearby fixes it.</span></h2>
     <div class="service-grid">{service_cards}</div>
   </div>
 </section>
 
 <section class="band-dark">
   <div class="wrap">
-    <h2>Three steps.<br><span class="muted">Zero guesswork.</span></h2>
+    <h2 data-reveal="1">Three steps.<br><span class="muted">Zero guesswork.</span></h2>
     <div class="steps-grid">
-      <div><div class="step-n">01</div><h3>Enter your suburb</h3><p>We show every listed repairer close to you, sorted by distance.</p></div>
-      <div><div class="step-n">02</div><h3>Compare &amp; choose</h3><p>See who's open now, what they fix and what it costs.</p></div>
-      <div><div class="step-n">03</div><h3>Walk in or call</h3><p>Most repairs are done the same day &mdash; often while you wait.</p></div>
+      <div data-reveal="1"><div class="step-n">01</div><h3>Enter your suburb</h3><p>We show every listed repairer close to you, sorted by distance.</p></div>
+      <div data-reveal="1"><div class="step-n">02</div><h3>Compare &amp; choose</h3><p>See who's open now, what they fix and what it costs.</p></div>
+      <div data-reveal="1"><div class="step-n">03</div><h3>Walk in or call</h3><p>Most repairs are done the same day &mdash; often while you wait.</p></div>
     </div>
   </div>
 </section>
 
-<section class="wrap brands"><p class="eyebrow center">Repairs for every major brand.</p><div class="brand-row">{brand_html}</div></section>
+<section class="wrap brands"><p class="eyebrow center" data-reveal="1">Repairs for every major brand.</p><div class="brand-row" data-reveal="1">{brand_html}</div></section>
 
 <section id="suburbs" class="band-light">
   <div class="wrap">
-    <h2>Find repair in your suburb.</h2>
-    <p class="lede">{len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions of Greater Sydney.</p>
+    <h2 data-reveal="1">Find repair in your suburb.</h2>
+    <p class="lede" data-reveal="1">{len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions of Greater Sydney.</p>
     <div class="region-grid">{region_cards}</div>
   </div>
 </section>
@@ -483,39 +484,6 @@ def build_home():
 </section>
 """
     write("index.html", page(title, desc, path, main_html, [website_ld, faq_ld]))
-
-
-def build_static_pages():
-    def simple(path, title, desc, h1, body_html):
-        register(path)
-        crumb_html, crumb_ld = breadcrumb([("Home", "/"), (h1, None)])
-        main_html = f"""
-<div class="wrap narrow">{crumb_html}</div>
-<section class="wrap narrow prose">
-  <h1>{esc(h1)}</h1>
-  {body_html}
-</section>
-"""
-        write(path.strip("/") + "/index.html", page(title, desc, path, main_html, [crumb_ld]))
-
-    simple("/about/", "About — Phone Repair Near Me", "Phone Repair Near Me is an independent directory of phone repair shops across Greater Sydney.",
-           "About Phone Repair Near Me",
-           """<p>Phone Repair Near Me is an independent directory that helps people across Greater Sydney find a trustworthy phone repair shop close to home — by suburb, not just by brand.</p>
-<p>We list stores by their real address and opening hours, rank them by distance from the suburb you search, and link straight through to call or get directions. We are not affiliated with Apple, Samsung, Google or any other device manufacturer.</p>""")
-
-    simple("/contact/", "Contact — Phone Repair Near Me", "Get in touch with Phone Repair Near Me.",
-           "Contact us",
-           """<p>Questions about a listing, or found something out of date? Email <a href="mailto:hello@phonerepairnearme.com.au">hello@phonerepairnearme.com.au</a>.</p>""")
-
-    simple("/privacy/", "Privacy Policy — Phone Repair Near Me", "How Phone Repair Near Me handles your data.",
-           "Privacy policy",
-           """<p>This site does not require an account and does not collect personal information beyond standard, aggregated web analytics used to understand which pages are useful.</p>
-<p>Links to external repairer websites, phone numbers and map directions take you off this site to third-party services, which have their own privacy practices.</p>""")
-
-    simple("/list-your-shop/", "List Your Shop — Phone Repair Near Me", "Get your phone repair shop listed on Phone Repair Near Me.",
-           "List your repair shop",
-           """<p>Run a phone repair shop in Sydney? Get listed on every nearby suburb page — free while we're building out coverage.</p>
-<p>Email your shop name, address, phone number and opening hours to <a href="mailto:hello@phonerepairnearme.com.au">hello@phonerepairnearme.com.au</a> and we'll add you.</p>""")
 
 
 def build_404():
@@ -556,10 +524,15 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:var(--ink)}
 .brand-mark{width:22px;height:22px;border-radius:7px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
 .nav-links{display:flex;gap:22px;font-size:14px}
-.nav-links a{color:var(--ink)}
+.nav-links a{color:var(--ink);opacity:.85}
+.nav-links a:hover{opacity:1}
+.nav-right{display:flex;align-items:center;gap:14px}
+.btn-pill{border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500}
 .nav-toggle{display:none;border:0;background:none;font-size:20px;cursor:pointer}
 @media(max-width:680px){.nav-links{display:none;position:absolute;top:52px;left:0;right:0;background:#fff;flex-direction:column;padding:16px 22px;border-bottom:1px solid var(--line)}.nav-links.open{display:flex}.nav-toggle{display:block}}
-.hero{text-align:center;padding:72px 22px 0}
+.hero{text-align:center;padding:72px 22px 0;overflow:hidden}
+.hero-image{max-width:1100px;margin:clamp(40px,6vw,72px) auto 0;aspect-ratio:16/8;min-height:260px;border-radius:28px 28px 0 0;overflow:hidden}
+.image-slot{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(180deg,#f5f5f7,#e8e8ed);color:var(--muted);font-size:14px;text-align:center;padding:16px}
 .hero h1{font-size:clamp(40px,8vw,88px)}
 .eyebrow{color:var(--warn);font-weight:600;margin:0 0 8px}
 .eyebrow.center{text-align:center}
@@ -576,8 +549,8 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .band-dark{background:#000;color:#f5f5f7;padding:64px 0}
 .band-dark .muted{color:#a1a1a6}
 .service-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px;margin-top:36px}
-.service-card{background:#fff;border-radius:22px;padding:28px 26px;min-height:220px;display:flex;flex-direction:column;color:var(--ink)}
-.service-card:hover{text-decoration:none;box-shadow:0 16px 40px rgba(0,0,0,.08)}
+.service-card{background:#fff;border-radius:22px;padding:28px 26px;min-height:220px;display:flex;flex-direction:column;color:var(--ink);transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s}
+.service-card:hover{text-decoration:none;transform:scale(1.015);box-shadow:0 20px 50px rgba(0,0,0,.08)}
 .service-card h2{font-size:24px;margin-top:6px}
 .service-card p{color:var(--sub);flex:1}
 .service-card .price{margin-top:auto;font-size:14px}
@@ -597,9 +570,10 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .breadcrumb .sep{color:var(--line)}
 .hero-suburb{padding:36px 22px 28px}
 .hero-suburb h1{font-size:clamp(34px,6vw,64px)}
-.notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:18px 20px;margin-bottom:20px}
-.notice p{margin:4px 0}
-.shop-list{display:flex;flex-direction:column;gap:14px;padding-bottom:40px}
+.suburb-shops{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;padding-bottom:clamp(64px,9vw,100px)}
+@media(max-width:733px){.suburb-shops{grid-template-columns:minmax(0,1fr)}.map-aside{display:none}}
+.shop-list{display:flex;flex-direction:column;gap:14px}
+.map-aside{position:sticky;top:72px;border-radius:24px;overflow:hidden;aspect-ratio:3/4}
 .shop-card{background:var(--bg-light);border-radius:20px;padding:22px}
 .shop-head{display:flex;gap:16px}
 .shop-rank{width:40px;height:40px;flex-shrink:0;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:700}
@@ -666,9 +640,29 @@ MAIN_JS = """
     }
   });
 
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'none';
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-reveal]').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1)';
+      io.observe(el);
+    });
+  }
+
   var input = document.getElementById('suburb-search-input');
   var results = document.getElementById('suburb-search-results');
-  var form = document.getElementById('suburb-search');
+  var form = document.getElementById('search');
   if (!input || !results || !form) return;
   var DATA = null;
   fetch('/assets/suburbs.json').then(function(r){ return r.json(); }).then(function(j){ DATA = j; });
@@ -752,7 +746,6 @@ def main():
         build_region_page(region)
     for svc in D.SERVICES:
         build_service_page(svc)
-    build_static_pages()
     build_404()
     build_robots()
     build_sitemap()

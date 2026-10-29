@@ -21,8 +21,11 @@
 <header class="site-header">
   <nav class="nav-wrap" aria-label="Primary">
     <a href="/" class="brand"><span class="brand-mark">P</span><span>phonerepair<span class="muted">nearme</span></span></a>
-    <button class="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">&#9776;</button>
-    <div class="nav-links" id="nav-links"><a href="/#repairs">Repair services</a><a href="/#suburbs">All suburbs</a><a href="/list-your-shop/">List your shop</a></div>
+    <div class="nav-links" id="nav-links"><a href="/#repairs">Repairs</a><a href="/#suburbs">Suburbs</a><a href="/#repairs">iPhone</a><a href="/#repairs">Samsung</a><a href="#">For shops</a></div>
+    <div class="nav-right">
+      <a class="btn-primary btn-pill" href="/#search">Find a repairer</a>
+      <button class="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">&#9776;</button>
+    </div>
   </nav>
 </header>
 <main>
@@ -30,43 +33,44 @@
   <p class="eyebrow">Every Sydney suburb. One search.</p>
   <h1>Phone repair.<br>Near you. Today.</h1>
   <p class="lede">Compare trusted local repairers for cracked screens, tired batteries and everything in between.</p>
-  <form class="search-form" id="suburb-search" role="search">
+  <form class="search-form" id="search" role="search">
     <input type="search" id="suburb-search-input" placeholder="Enter your suburb or postcode" aria-label="Suburb or postcode" autocomplete="off">
     <button type="submit">Search</button>
     <div id="suburb-search-results" class="search-results" hidden></div>
   </form>
   <p class="quick-links"><a href="#repairs">Browse repairs &rsaquo;</a> <a href="#suburbs">All suburbs &rsaquo;</a></p>
+  <div class="hero-image"><div class="image-slot">Hero image &mdash; phone being repaired, shot from above</div></div>
 </section>
 
 <section id="repairs" class="band-light">
   <div class="wrap">
-    <h2>Whatever broke,<br><span class="muted">someone nearby fixes it.</span></h2>
-    <div class="service-grid"><a class="service-card" href="/screen-repair/">
+    <h2 data-reveal="1">Whatever broke,<br><span class="muted">someone nearby fixes it.</span></h2>
+    <div class="service-grid"><a class="service-card" data-reveal="1" href="/screen-repair/">
   <span class="eyebrow">Most popular</span>
   <h2>Screen repair</h2>
   <p>Cracked glass, dead pixels or unresponsive touch. Most done in under an hour.</p>
   <span class="price">From $89</span>
-</a><a class="service-card" href="/battery-replacement/">
+</a><a class="service-card" data-reveal="1" href="/battery-replacement/">
   <span class="eyebrow">While you wait</span>
   <h2>Battery replacement</h2>
   <p>Get your all-day battery back. Usually 30 minutes.</p>
   <span class="price">From $69</span>
-</a><a class="service-card" href="/charging-port-repair/">
+</a><a class="service-card" data-reveal="1" href="/charging-port-repair/">
   <span class="eyebrow">Same day</span>
   <h2>Charging port</h2>
   <p>Loose cable, slow charge or nothing at all — cleaned or replaced.</p>
   <span class="price">From $79</span>
-</a><a class="service-card" href="/back-glass-replacement/">
+</a><a class="service-card" data-reveal="1" href="/back-glass-replacement/">
   <span class="eyebrow">Same day</span>
   <h2>Back glass</h2>
   <p>Shattered rear glass replaced and resealed.</p>
   <span class="price">From $99</span>
-</a><a class="service-card" href="/camera-repair/">
+</a><a class="service-card" data-reveal="1" href="/camera-repair/">
   <span class="eyebrow">Same day</span>
   <h2>Camera</h2>
   <p>Blurry, cracked lens or black viewfinder fixed.</p>
   <span class="price">From $89</span>
-</a><a class="service-card" href="/water-damage-repair/">
+</a><a class="service-card" data-reveal="1" href="/water-damage-repair/">
   <span class="eyebrow">Free diagnosis</span>
   <h2>Water damage</h2>
   <p>Dropped in the pool? Bring it in fast — the sooner, the better.</p>
@@ -77,22 +81,22 @@
 
 <section class="band-dark">
   <div class="wrap">
-    <h2>Three steps.<br><span class="muted">Zero guesswork.</span></h2>
+    <h2 data-reveal="1">Three steps.<br><span class="muted">Zero guesswork.</span></h2>
     <div class="steps-grid">
-      <div><div class="step-n">01</div><h3>Enter your suburb</h3><p>We show every listed repairer close to you, sorted by distance.</p></div>
-      <div><div class="step-n">02</div><h3>Compare &amp; choose</h3><p>See who's open now, what they fix and what it costs.</p></div>
-      <div><div class="step-n">03</div><h3>Walk in or call</h3><p>Most repairs are done the same day &mdash; often while you wait.</p></div>
+      <div data-reveal="1"><div class="step-n">01</div><h3>Enter your suburb</h3><p>We show every listed repairer close to you, sorted by distance.</p></div>
+      <div data-reveal="1"><div class="step-n">02</div><h3>Compare &amp; choose</h3><p>See who's open now, what they fix and what it costs.</p></div>
+      <div data-reveal="1"><div class="step-n">03</div><h3>Walk in or call</h3><p>Most repairs are done the same day &mdash; often while you wait.</p></div>
     </div>
   </div>
 </section>
 
-<section class="wrap brands"><p class="eyebrow center">Repairs for every major brand.</p><div class="brand-row"><span>iPhone</span><span>Samsung</span><span>Google Pixel</span><span>Oppo</span><span>Motorola</span><span>iPad</span></div></section>
+<section class="wrap brands"><p class="eyebrow center" data-reveal="1">Repairs for every major brand.</p><div class="brand-row" data-reveal="1"><span>iPhone</span><span>Samsung</span><span>Google Pixel</span><span>Oppo</span><span>Motorola</span><span>iPad</span></div></section>
 
 <section id="suburbs" class="band-light">
   <div class="wrap">
-    <h2>Find repair in your suburb.</h2>
-    <p class="lede">594 suburbs across 17 regions of Greater Sydney.</p>
-    <div class="region-grid"><a class="region-card" href="/sydney-cbd-inner-city/"><h3>Sydney CBD &amp; Inner City</h3><span class="muted">25 suburbs</span></a><a class="region-card" href="/eastern-suburbs/"><h3>Eastern Suburbs</h3><span class="muted">42 suburbs</span></a><a class="region-card" href="/inner-west/"><h3>Inner West</h3><span class="muted">50 suburbs</span></a><a class="region-card" href="/lower-north-shore/"><h3>Lower North Shore</h3><span class="muted">39 suburbs</span></a><a class="region-card" href="/upper-north-shore/"><h3>Upper North Shore</h3><span class="muted">37 suburbs</span></a><a class="region-card" href="/ryde-epping/"><h3>Ryde &amp; Epping</h3><span class="muted">22 suburbs</span></a><a class="region-card" href="/northern-beaches/"><h3>Northern Beaches</h3><span class="muted">43 suburbs</span></a><a class="region-card" href="/hills-district/"><h3>Hills District</h3><span class="muted">25 suburbs</span></a><a class="region-card" href="/parramatta-auburn/"><h3>Parramatta &amp; Auburn</h3><span class="muted">34 suburbs</span></a><a class="region-card" href="/blacktown-mount-druitt/"><h3>Blacktown &amp; Mount Druitt</h3><span class="muted">44 suburbs</span></a><a class="region-card" href="/penrith-region/"><h3>Penrith</h3><span class="muted">25 suburbs</span></a><a class="region-card" href="/hawkesbury/"><h3>Hawkesbury</h3><span class="muted">11 suburbs</span></a><a class="region-card" href="/canterbury-bankstown/"><h3>Canterbury-Bankstown</h3><span class="muted">36 suburbs</span></a><a class="region-card" href="/st-george/"><h3>St George</h3><span class="muted">30 suburbs</span></a><a class="region-card" href="/sutherland-shire/"><h3>Sutherland Shire</h3><span class="muted">38 suburbs</span></a><a class="region-card" href="/liverpool-fairfield/"><h3>Liverpool &amp; Fairfield</h3><span class="muted">53 suburbs</span></a><a class="region-card" href="/macarthur/"><h3>Macarthur</h3><span class="muted">40 suburbs</span></a></div>
+    <h2 data-reveal="1">Find repair in your suburb.</h2>
+    <p class="lede" data-reveal="1">594 suburbs across 17 regions of Greater Sydney.</p>
+    <div class="region-grid"><a class="region-card" data-reveal="1" href="/sydney-cbd-inner-city/"><h3>Sydney CBD &amp; Inner City</h3><span class="muted">25 suburbs</span></a><a class="region-card" data-reveal="1" href="/eastern-suburbs/"><h3>Eastern Suburbs</h3><span class="muted">42 suburbs</span></a><a class="region-card" data-reveal="1" href="/inner-west/"><h3>Inner West</h3><span class="muted">50 suburbs</span></a><a class="region-card" data-reveal="1" href="/lower-north-shore/"><h3>Lower North Shore</h3><span class="muted">39 suburbs</span></a><a class="region-card" data-reveal="1" href="/upper-north-shore/"><h3>Upper North Shore</h3><span class="muted">37 suburbs</span></a><a class="region-card" data-reveal="1" href="/ryde-epping/"><h3>Ryde &amp; Epping</h3><span class="muted">22 suburbs</span></a><a class="region-card" data-reveal="1" href="/northern-beaches/"><h3>Northern Beaches</h3><span class="muted">43 suburbs</span></a><a class="region-card" data-reveal="1" href="/hills-district/"><h3>Hills District</h3><span class="muted">25 suburbs</span></a><a class="region-card" data-reveal="1" href="/parramatta-auburn/"><h3>Parramatta &amp; Auburn</h3><span class="muted">34 suburbs</span></a><a class="region-card" data-reveal="1" href="/blacktown-mount-druitt/"><h3>Blacktown &amp; Mount Druitt</h3><span class="muted">44 suburbs</span></a><a class="region-card" data-reveal="1" href="/penrith-region/"><h3>Penrith</h3><span class="muted">25 suburbs</span></a><a class="region-card" data-reveal="1" href="/hawkesbury/"><h3>Hawkesbury</h3><span class="muted">11 suburbs</span></a><a class="region-card" data-reveal="1" href="/canterbury-bankstown/"><h3>Canterbury-Bankstown</h3><span class="muted">36 suburbs</span></a><a class="region-card" data-reveal="1" href="/st-george/"><h3>St George</h3><span class="muted">30 suburbs</span></a><a class="region-card" data-reveal="1" href="/sutherland-shire/"><h3>Sutherland Shire</h3><span class="muted">38 suburbs</span></a><a class="region-card" data-reveal="1" href="/liverpool-fairfield/"><h3>Liverpool &amp; Fairfield</h3><span class="muted">53 suburbs</span></a><a class="region-card" data-reveal="1" href="/macarthur/"><h3>Macarthur</h3><span class="muted">40 suburbs</span></a></div>
   </div>
 </section>
 
@@ -117,7 +121,7 @@
 </section>
 </main><footer class="site-footer">
   <div class="wrap">
-    <div class="footer-cols"><div><h4>Repairs</h4><ul><li><a href="/screen-repair/">Screen repair</a></li><li><a href="/battery-replacement/">Battery replacement</a></li><li><a href="/charging-port-repair/">Charging port</a></li><li><a href="/back-glass-replacement/">Back glass</a></li><li><a href="/camera-repair/">Camera</a></li><li><a href="/water-damage-repair/">Water damage</a></li></ul></div><div><h4>Brands</h4><ul><li><a href="/#repairs">iPhone</a></li><li><a href="/#repairs">Samsung</a></li><li><a href="/#repairs">Google Pixel</a></li><li><a href="/#repairs">Oppo</a></li><li><a href="/#repairs">Motorola</a></li><li><a href="/#repairs">iPad</a></li></ul></div><div><h4>Regions</h4><ul><li><a href="/sydney-cbd-inner-city/">Sydney CBD &amp; Inner City</a></li><li><a href="/eastern-suburbs/">Eastern Suburbs</a></li><li><a href="/inner-west/">Inner West</a></li><li><a href="/lower-north-shore/">Lower North Shore</a></li><li><a href="/upper-north-shore/">Upper North Shore</a></li><li><a href="/ryde-epping/">Ryde &amp; Epping</a></li></ul></div><div><h4>Company</h4><ul><li><a href="/about/">About</a></li><li><a href="/list-your-shop/">List your shop</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy/">Privacy</a></li></ul></div></div>
+    <div class="footer-cols"><div><h4>Repairs</h4><ul><li><a href="/screen-repair/">Screen repair</a></li><li><a href="/battery-replacement/">Battery replacement</a></li><li><a href="/charging-port-repair/">Charging port</a></li><li><a href="/back-glass-replacement/">Back glass</a></li><li><a href="/camera-repair/">Camera</a></li><li><a href="/water-damage-repair/">Water damage</a></li></ul></div><div><h4>Brands</h4><ul><li><a href="/#repairs">iPhone</a></li><li><a href="/#repairs">Samsung</a></li><li><a href="/#repairs">Google Pixel</a></li><li><a href="/#repairs">Oppo</a></li><li><a href="/#repairs">Motorola</a></li><li><a href="/#repairs">iPad</a></li></ul></div><div><h4>Regions</h4><ul><li><a href="/sydney-cbd-inner-city/">Sydney CBD &amp; Inner City</a></li><li><a href="/eastern-suburbs/">Eastern Suburbs</a></li><li><a href="/inner-west/">Inner West</a></li><li><a href="/lower-north-shore/">Lower North Shore</a></li><li><a href="/upper-north-shore/">Upper North Shore</a></li><li><a href="/ryde-epping/">Ryde &amp; Epping</a></li></ul></div><div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">List your shop</a></li><li><a href="#">Contact</a></li><li><a href="#">Privacy</a></li></ul></div></div>
     <div class="footer-bottom">
       <span>&copy; 2026 phonerepairnearme.com.au &middot; Independent directory, not affiliated with any manufacturer.</span>
       <span>Sydney, NSW</span>
