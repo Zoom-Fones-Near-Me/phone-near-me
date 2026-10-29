@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /tools/
+Disallow: /legacy-artifact/
+
+Sitemap: https://phonerepairnearme.com.au/sitemap.xml

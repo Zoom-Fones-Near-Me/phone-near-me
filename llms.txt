@@ -1,0 +1,18 @@
+# Phone Repair Near Me
+
+> Independent directory of phone repair shops across Greater Sydney, NSW. Compare screen, battery, charging port, back glass, camera and water-damage repair options by suburb, with store distance, hours and contact details.
+
+Phone Repair Near Me helps people in any Sydney suburb find the closest listed phone repair store, see indicative pricing and get directions or a phone number. The directory is independent of any phone manufacturer.
+
+## Key pages
+- [Home](https://phonerepairnearme.com.au/): overview and suburb search
+- [All Sydney suburbs](https://phonerepairnearme.com.au/sydney/): full directory grouped by region (594 suburbs, 17 regions)
+- [Repair services](https://phonerepairnearme.com.au/services/): screen, battery, charging port, back glass, camera, water damage
+- [About](https://phonerepairnearme.com.au/about/)
+- [List your shop](https://phonerepairnearme.com.au/list-your-shop/): for repair businesses that want to be listed
+- [Full sitemap](https://phonerepairnearme.com.au/sitemap.xml): every suburb, region and service URL
+
+## Notes
+- Each suburb page (`https://phonerepairnearme.com.au/sydney/<suburb>/`) ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
+- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-10-29, so distances on far suburb pages can be large — this is disclosed on the page itself.
+- Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.
