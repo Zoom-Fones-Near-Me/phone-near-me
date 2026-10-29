@@ -108,6 +108,9 @@ def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;"))
 
 
+LEAFLET_CSS = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">\n'
+LEAFLET_JS = '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>\n'
+
 NAV_LINKS = [
     ("Repairs", "/#repairs"),
     ("Suburbs", "/#suburbs"),
@@ -117,7 +120,7 @@ NAV_LINKS = [
 ]
 
 
-def head(title, description, canonical_path, extra_jsonld=None):
+def head(title, description, canonical_path, extra_jsonld=None, extra_head=""):
     canonical = D.DOMAIN + canonical_path
     jsonld = ""
     if extra_jsonld:
@@ -139,7 +142,7 @@ def head(title, description, canonical_path, extra_jsonld=None):
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/assets/style.css">
-{jsonld}</head>
+{extra_head}{jsonld}</head>
 <body>
 """
 
@@ -200,8 +203,10 @@ def breadcrumb(items):
     return html, jsonld
 
 
-def page(title, description, canonical_path, main_html, extra_jsonld=None):
-    return head(title, description, canonical_path, extra_jsonld) + header_html() + f'<main>{main_html}</main>' + footer_html() + '<script src="/assets/main.js"></script>\n</body>\n</html>\n'
+def page(title, description, canonical_path, main_html, extra_jsonld=None, extra_head="", extra_foot=""):
+    return (head(title, description, canonical_path, extra_jsonld, extra_head) + header_html()
+            + f'<main>{main_html}</main>' + footer_html() + extra_foot
+            + '<script src="/assets/main.js"></script>\n</body>\n</html>\n')
 
 
 # ---------------------------------------------------------------------------
@@ -317,6 +322,9 @@ def build_suburb_page(suburb):
     title = f"Phone Repair in {suburb['name']} — Compare Local Repairers | Phone Repair Near Me"
     desc = f"Find phone screen, battery and charging repair near {suburb['name']} NSW {suburb['postcode']}. Nearest listed store: {nearest_shop['name']}, {nearest_dist:.1f} km away."
 
+    map_suburb = esc(json.dumps({"name": suburb['name'], "ll": list(suburb_coord(suburb))}, ensure_ascii=False))
+    map_shops = esc(json.dumps([{"name": sh['name'], "ll": sh['ll'], "maps": sh['maps']} for d, sh in ranked], ensure_ascii=False))
+
     main_html = f"""
 <div class="wrap narrow">{crumb_html}</div>
 <section class="hero-suburb wrap narrow">
@@ -327,7 +335,7 @@ def build_suburb_page(suburb):
 <section class="wrap narrow suburb-shops">
   <div class="shop-list">{cards}</div>
   <aside class="map-aside">
-    <div class="image-slot">Map of repairers near {esc(suburb['name'])}</div>
+    <div id="leaflet-map" class="leaflet-map" data-suburb='{map_suburb}' data-shops='{map_shops}'></div>
   </aside>
 </section>
 <section class="band-light">
@@ -345,7 +353,8 @@ def build_suburb_page(suburb):
   <p><a href="/{REGION_SLUG[suburb['region']]}/">See all of {esc(suburb['region'])} &rsaquo;</a></p>
 </section>
 """
-    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld]))
+    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld],
+          extra_head=LEAFLET_CSS, extra_foot=LEAFLET_JS))
 
 
 def build_region_page(region):
@@ -575,7 +584,8 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .suburb-shops{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;padding-bottom:clamp(64px,9vw,100px)}
 @media(max-width:733px){.suburb-shops{grid-template-columns:minmax(0,1fr)}.map-aside{display:none}}
 .shop-list{display:flex;flex-direction:column;gap:14px}
-.map-aside{position:sticky;top:72px;border-radius:24px;overflow:hidden;aspect-ratio:3/4}
+.map-aside{position:sticky;top:72px;border-radius:24px;overflow:hidden;aspect-ratio:3/4;background:var(--bg-light)}
+.leaflet-map{width:100%;height:100%}
 .shop-card{background:var(--bg-light);border-radius:20px;padding:22px}
 .shop-head{display:flex;gap:16px}
 .shop-rank{width:40px;height:40px;flex-shrink:0;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:700}
@@ -662,6 +672,26 @@ MAIN_JS = """
       el.style.transition = 'opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1)';
       io.observe(el);
     });
+  }
+
+  var mapEl = document.getElementById('leaflet-map');
+  if (mapEl && window.L) {
+    try {
+      var suburbPt = JSON.parse(mapEl.getAttribute('data-suburb'));
+      var shopPts = JSON.parse(mapEl.getAttribute('data-shops'));
+      var map = L.map(mapEl, { scrollWheelZoom: false }).setView(suburbPt.ll, 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      var bounds = [suburbPt.ll];
+      L.marker(suburbPt.ll).addTo(map).bindPopup(suburbPt.name).openPopup();
+      shopPts.forEach(function(s){
+        bounds.push(s.ll);
+        L.marker(s.ll).addTo(map).bindPopup('<strong>' + s.name + '</strong><br><a href="' + s.maps + '" target="_blank" rel="noopener">Directions</a>');
+      });
+      map.fitBounds(bounds, { padding: [28, 28] });
+    } catch (e) { /* leave the aside empty if the map fails to init */ }
   }
 
   var input = document.getElementById('suburb-search-input');

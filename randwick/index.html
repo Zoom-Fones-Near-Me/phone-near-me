@@ -14,6 +14,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://phonerepairnearme.com.au/"}, {"@type": "ListItem", "position": 2, "name": "Eastern Suburbs", "item": "https://phonerepairnearme.com.au/eastern-suburbs/"}, {"@type": "ListItem", "position": 3, "name": "Randwick", "item": null}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": 1, "item": {"@type": "LocalBusiness", "name": "ZoomFones Drummoyne", "address": "Birkenhead Point Brand Outlet, 19 Roseby Street, Drummoyne NSW 2047", "telephone": null, "url": "https://zoom-fones.com.au/drummoyne"}}, {"@type": "ListItem", "position": 2, "item": {"@type": "LocalBusiness", "name": "ZoomFones Melrose Park", "address": "33 Hope Street, Melrose Park NSW 2114", "telephone": "0494 527 820", "url": "https://zoom-fones.com.au/melrose-park"}}, {"@type": "ListItem", "position": 3, "item": {"@type": "LocalBusiness", "name": "ZoomFones Leppington", "address": "108 Ingleburn Road, Leppington NSW 2179", "telephone": "0490 803 024", "url": "https://zoom-fones.com.au/leppington"}}]}</script>
 </head>
@@ -94,7 +95,7 @@
   </div>
 </article></div>
   <aside class="map-aside">
-    <div class="image-slot">Map of repairers near Randwick</div>
+    <div id="leaflet-map" class="leaflet-map" data-suburb='{&quot;name&quot;: &quot;Randwick&quot;, &quot;ll&quot;: [-33.914, 151.245]}' data-shops='[{&quot;name&quot;: &quot;ZoomFones Drummoyne&quot;, &quot;ll&quot;: [-33.856, 151.164], &quot;maps&quot;: &quot;https://www.google.com/maps/search/?api=1&amp;query=Birkenhead+Point+Brand+Outlet+Drummoyne&quot;}, {&quot;name&quot;: &quot;ZoomFones Melrose Park&quot;, &quot;ll&quot;: [-33.814, 151.0735], &quot;maps&quot;: &quot;https://www.google.com/maps/place/?q=place_id%3AChIJm-fdEgKlEmsRKMCC6tPkJ90&quot;}, {&quot;name&quot;: &quot;ZoomFones Leppington&quot;, &quot;ll&quot;: [-33.954, 150.81], &quot;maps&quot;: &quot;https://www.google.com/maps/place/?q=place_id%3AChIJh0nZrsntEmsRXzmP_i_94Gw&quot;}]'></div>
   </aside>
 </section>
 <section class="band-light">
@@ -120,6 +121,7 @@
     </div>
   </div>
 </footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/assets/main.js"></script>
 </body>
 </html>

@@ -47,6 +47,26 @@
     });
   }
 
+  var mapEl = document.getElementById('leaflet-map');
+  if (mapEl && window.L) {
+    try {
+      var suburbPt = JSON.parse(mapEl.getAttribute('data-suburb'));
+      var shopPts = JSON.parse(mapEl.getAttribute('data-shops'));
+      var map = L.map(mapEl, { scrollWheelZoom: false }).setView(suburbPt.ll, 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      var bounds = [suburbPt.ll];
+      L.marker(suburbPt.ll).addTo(map).bindPopup(suburbPt.name).openPopup();
+      shopPts.forEach(function(s){
+        bounds.push(s.ll);
+        L.marker(s.ll).addTo(map).bindPopup('<strong>' + s.name + '</strong><br><a href="' + s.maps + '" target="_blank" rel="noopener">Directions</a>');
+      });
+      map.fitBounds(bounds, { padding: [28, 28] });
+    } catch (e) { /* leave the aside empty if the map fails to init */ }
+  }
+
   var input = document.getElementById('suburb-search-input');
   var results = document.getElementById('suburb-search-results');
   var form = document.getElementById('search');
