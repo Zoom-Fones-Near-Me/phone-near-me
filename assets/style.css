@@ -74,9 +74,11 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .shop-note{color:var(--muted);font-size:13px;margin:2px 0 0}
 .shop-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
 .shop-status{font-size:13px;color:var(--sub);margin:0}
-.shop-buttons{display:flex;gap:10px}
+.shop-buttons{display:flex;gap:10px;flex-wrap:wrap}
 .btn-primary{background:var(--accent);color:#fff;font-size:14px;font-weight:500;padding:9px 18px;border-radius:980px}
 .btn-primary:hover{text-decoration:none;background:#0077ed}
+.btn-dark{background:var(--ink);color:#fff;font-size:14px;font-weight:500;padding:9px 18px;border-radius:980px}
+.btn-dark:hover{text-decoration:none;background:#000}
 .btn-outline{border:1px solid var(--accent);color:var(--accent);font-size:14px;font-weight:500;padding:8px 17px;border-radius:980px}
 .btn-outline:hover{text-decoration:none}
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:40px;padding:56px 0}
