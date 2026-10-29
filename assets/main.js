@@ -46,12 +46,12 @@
     }).filter(function(x){ return x.score < 9; }).sort(function(a, b){ return a.score - b.score || a.s.n.localeCompare(b.s.n); }).slice(0, 6);
     current = scored.map(function(x){ return x.s; });
     if (!current.length) return;
-    results.innerHTML = current.map(function(s){ return '<a href="/sydney/' + s.s + '/">' + s.n + '<span class="muted">' + s.r + '</span></a>'; }).join('');
+    results.innerHTML = current.map(function(s){ return '<a href="/' + s.s + '/">' + s.n + '<span class="muted">' + s.r + '</span></a>'; }).join('');
     results.hidden = false;
   });
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    if (current.length) window.location.href = '/sydney/' + current[0].s + '/';
+    if (current.length) window.location.href = '/' + current[0].s + '/';
   });
   document.addEventListener('click', function(e){ if (!form.contains(e.target)) results.hidden = true; });
 })();

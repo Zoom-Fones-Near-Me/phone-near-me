@@ -6,13 +6,21 @@ build step at request time. GitHub Pages serves the files in this repo as-is.
 
 ## Structure
 
+Every page lives at the site root — no `/sydney/` or `/services/` path
+prefix; Sydney/the suburb's region is mentioned in each page's own copy
+instead, not baked into the URL.
+
 - `index.html`, `about/`, `contact/`, `privacy/`, `list-your-shop/` — top-level pages
-- `sydney/<suburb>/` — one page per suburb (594), ranked by distance to listed stores
-- `sydney/<region>/` — one hub page per region (17), linking every suburb in it
-- `services/<service>/` — one page per repair type (6)
+- `<suburb>/` — one page per suburb (594), ranked by distance to listed stores
+- `<region>/` — one hub page per region (17), linking every suburb in it
+- `<service>/` — one page per repair type (6)
 - `assets/` — shared `style.css`, `main.js` (mobile nav, live open/closed status, suburb search), `favicon.svg`, `suburbs.json` (client-side search index)
 - `robots.txt`, `sitemap.xml`, `llms.txt`, `CNAME`, `.nojekyll` — site-level SEO/hosting files
 - `legacy-artifact/` — original Claude Artifact export this site replaced (kept for reference, excluded from the sitemap and disallowed in robots.txt)
+
+A suburb, region or service slug that collides with another reserved name
+(e.g. the "Penrith" region vs. the "Penrith" suburb) is disambiguated
+automatically by `tools/build.py` — the suburb keeps the plain slug.
 
 ## Regenerating the site
 

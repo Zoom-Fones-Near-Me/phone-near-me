@@ -19,18 +19,21 @@ import data as D
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TODAY = date.today().isoformat()
 
-PUBLISHED_DIRS = ['sydney', 'services', 'about', 'contact', 'privacy', 'list-your-shop', 'assets']
-PUBLISHED_FILES = ['index.html', '404.html', 'robots.txt', 'sitemap.xml', 'llms.txt', 'CNAME', '.nojekyll']
+# Everything at repo root is generated output EXCEPT these — a flat URL
+# structure means suburb/region/service folders (600+ of them) live at the
+# root too, so clean_output() wipes anything not explicitly protected rather
+# than naming each generated folder.
+PROTECTED = {'tools', 'legacy-artifact', '.git', '.gitignore', 'README.md'}
 
 
 def clean_output():
-    for d in PUBLISHED_DIRS:
-        p = os.path.join(ROOT, d)
+    for name in os.listdir(ROOT):
+        if name in PROTECTED:
+            continue
+        p = os.path.join(ROOT, name)
         if os.path.isdir(p):
             shutil.rmtree(p)
-    for f in PUBLISHED_FILES:
-        p = os.path.join(ROOT, f)
-        if os.path.isfile(p):
+        else:
             os.remove(p)
 
 
@@ -56,21 +59,36 @@ def haversine(a, b):
     return 2 * R * math.asin(math.sqrt(x))
 
 
-# ---- derive slugs, disambiguating any future name collisions by postcode ----
-_seen = {}
+# ---- derive slugs for FLAT root-level URLs (no /sydney/, no /services/) ----
+# Suburbs claim the plain slug first (that's what people actually search for);
+# regions/services fall back to a suffixed slug on collision (e.g. the
+# "Penrith" region vs. the "Penrith" suburb both slugify to "penrith").
+RESERVED_SLUGS = {'about', 'contact', 'privacy', 'list-your-shop', 'assets',
+                   'tools', 'legacy-artifact', 'sitemap', 'robots', 'llms', '404'}
+_used = set(RESERVED_SLUGS)
+
 for s in D.SUBURBS:
     slug = slugify(s['name'])
-    if slug in _seen and _seen[slug] != s['name']:
+    if slug in _used:
         slug = slug + "-" + s['postcode']
-    _seen[slug] = s['name']
+    _used.add(slug)
     s['slug'] = slug
 
+REGION_SLUG = {}
 for r in D.REGIONS:
-    pass
-REGION_SLUG = {r: slugify(r) for r in D.REGIONS}
+    slug = slugify(r)
+    if slug in _used:
+        slug = slug + "-region"
+    _used.add(slug)
+    REGION_SLUG[r] = slug
 
 for sh in D.SHOPS:
     sh['slug'] = slugify(sh['name'])
+
+for svc in D.SERVICES:
+    if svc['slug'] in _used:
+        svc['slug'] = svc['slug'] + "-repair"
+    _used.add(svc['slug'])
 
 ALL_URLS = []  # (path, lastmod) for sitemap.xml, path is root-relative with leading /
 
@@ -91,8 +109,8 @@ def esc(s):
 
 
 NAV_LINKS = [
-    ("Repair services", "/services/"),
-    ("All suburbs", "/sydney/"),
+    ("Repair services", "/#repairs"),
+    ("All suburbs", "/#suburbs"),
     ("List your shop", "/list-your-shop/"),
 ]
 
@@ -138,9 +156,9 @@ def header_html():
 
 def footer_html():
     cols = [
-        ("Repairs", [(s['name'], f"/services/{s['slug']}/") for s in D.SERVICES]),
-        ("Brands", [(b, "/services/") for b in D.BRANDS]),
-        ("Regions", [(r, f"/sydney/{REGION_SLUG[r]}/") for r in D.REGIONS[:6]]),
+        ("Repairs", [(s['name'], f"/{s['slug']}/") for s in D.SERVICES]),
+        ("Brands", [(b, "/#repairs") for b in D.BRANDS]),
+        ("Regions", [(r, f"/{REGION_SLUG[r]}/") for r in D.REGIONS[:6]]),
         ("Company", [("About", "/about/"), ("List your shop", "/list-your-shop/"), ("Contact", "/contact/"), ("Privacy", "/privacy/")]),
     ]
     cols_html = ""
@@ -253,7 +271,7 @@ def suburb_intro(suburb):
 # ---------------------------------------------------------------------------
 
 def build_suburb_page(suburb):
-    path = f"/sydney/{suburb['slug']}/"
+    path = f"/{suburb['slug']}/"
     register(path)
     ranked = ranked_shops(suburb)
     nearest_dist, nearest_shop = ranked[0]
@@ -269,7 +287,7 @@ def build_suburb_page(suburb):
     same_region = [s for s in D.SUBURBS if s['region'] == suburb['region'] and s['id'] != suburb['id']]
     same_region.sort(key=lambda s: abs(int(s['postcode']) - int(suburb['postcode'])))
     nearby = same_region[:12]
-    nearby_html = "".join(f'<a class="chip" href="/sydney/{n["slug"]}/">{esc(n["name"])}</a>' for n in nearby)
+    nearby_html = "".join(f'<a class="chip" href="/{n["slug"]}/">{esc(n["name"])}</a>' for n in nearby)
 
     services_li = "".join(
         f'<li><span>{esc(s["name"])}</span><span class="muted">{"From $" + str(s["price"]) if s["price"] else "Free diagnosis"}</span></li>'
@@ -277,7 +295,7 @@ def build_suburb_page(suburb):
     )
 
     crumb_html, crumb_ld = breadcrumb([
-        ("Home", "/"), ("Sydney", "/sydney/"), (suburb['region'], f"/sydney/{REGION_SLUG[suburb['region']]}/"), (suburb['name'], None),
+        ("Home", "/"), (suburb['region'], f"/{REGION_SLUG[suburb['region']]}/"), (suburb['name'], None),
     ])
 
     shops_ld = {
@@ -322,20 +340,20 @@ def build_suburb_page(suburb):
 <section class="wrap narrow">
   <h2>Nearby suburbs</h2>
   <div class="chip-row">{nearby_html}</div>
-  <p><a href="/sydney/{REGION_SLUG[suburb['region']]}/">See all of {esc(suburb['region'])} &rsaquo;</a></p>
+  <p><a href="/{REGION_SLUG[suburb['region']]}/">See all of {esc(suburb['region'])} &rsaquo;</a></p>
 </section>
 """
-    write(f"sydney/{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld]))
+    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld]))
 
 
 def build_region_page(region):
     slug = REGION_SLUG[region]
-    path = f"/sydney/{slug}/"
+    path = f"/{slug}/"
     register(path)
     suburbs = sorted([s for s in D.SUBURBS if s['region'] == region], key=lambda s: s['name'])
-    items = "".join(f'<li><a href="/sydney/{s["slug"]}/">{esc(s["name"])} <span class="muted">{esc(s["postcode"])}</span></a></li>' for s in suburbs)
+    items = "".join(f'<li><a href="/{s["slug"]}/">{esc(s["name"])} <span class="muted">{esc(s["postcode"])}</span></a></li>' for s in suburbs)
 
-    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Sydney", "/sydney/"), (region, None)])
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), (region, None)])
     title = f"Phone Repair in {region} — All Suburbs | Phone Repair Near Me"
     desc = f"Compare phone repair shops across every suburb in {region}, Sydney. {len(suburbs)} suburbs covered, ranked by distance to the nearest listed store."
 
@@ -348,42 +366,17 @@ def build_region_page(region):
 </section>
 <section class="wrap narrow">
   <ul class="suburb-grid">{items}</ul>
-  <p><a href="/sydney/">&larr; All regions</a></p>
+  <p><a href="/#suburbs">&larr; All regions</a></p>
 </section>
 """
-    write(f"sydney/{slug}/index.html", page(title, desc, path, main_html, [crumb_ld]))
-
-
-def build_sydney_index():
-    path = "/sydney/"
-    register(path)
-    sections = ""
-    for region in D.REGIONS:
-        suburbs = sorted([s for s in D.SUBURBS if s['region'] == region], key=lambda s: s['name'])
-        links = "".join(f'<a href="/sydney/{s["slug"]}/">{esc(s["name"])}</a>' for s in suburbs)
-        sections += f"""<div class="region-block">
-  <h2><a href="/sydney/{REGION_SLUG[region]}/">{esc(region)}</a> <span class="muted">{len(suburbs)} suburbs</span></h2>
-  <div class="link-grid">{links}</div>
-</div>"""
-    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Sydney", None)])
-    title = "All Sydney Suburbs — Phone Repair Directory | Phone Repair Near Me"
-    desc = f"Browse phone repair options in all {len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions of Greater Sydney."
-    main_html = f"""
-<div class="wrap narrow">{crumb_html}</div>
-<section class="hero-suburb wrap narrow">
-  <h1>Find repair in your suburb.</h1>
-  <p class="lede">{len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions of Greater Sydney.</p>
-</section>
-<section class="wrap narrow">{sections}</section>
-"""
-    write("sydney/index.html", page(title, desc, path, main_html, [crumb_ld]))
+    write(f"{slug}/index.html", page(title, desc, path, main_html, [crumb_ld]))
 
 
 def build_service_page(svc):
-    path = f"/services/{svc['slug']}/"
+    path = f"/{svc['slug']}/"
     register(path)
-    region_links = "".join(f'<a href="/sydney/{REGION_SLUG[r]}/">{esc(r)}</a>' for r in D.REGIONS)
-    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Repair services", "/services/"), (svc['name'], None)])
+    region_links = "".join(f'<a href="/{REGION_SLUG[r]}/">{esc(r)}</a>' for r in D.REGIONS)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), (svc['name'], None)])
     price_label = f"From ${svc['price']}" if svc['price'] else "Free diagnosis"
     title = f"{svc['name']} — Sydney Wide | Phone Repair Near Me"
     desc = f"{svc['desc']} {price_label}. Compare listed repairers across Greater Sydney by suburb."
@@ -403,35 +396,10 @@ def build_service_page(svc):
   <h2>Available across Greater Sydney</h2>
   <p>Find a {esc(svc['name'].lower())} repairer near you by suburb or browse by region:</p>
   <div class="link-grid">{region_links}</div>
-  <p><a href="/sydney/">Browse all suburbs &rsaquo;</a></p>
+  <p><a href="/#suburbs">Browse all suburbs &rsaquo;</a></p>
 </section>
 """
-    write(f"services/{svc['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, service_ld]))
-
-
-def build_services_index():
-    path = "/services/"
-    register(path)
-    cards = ""
-    for s in D.SERVICES:
-        price_label = f"From ${s['price']}" if s['price'] else "Free diagnosis"
-        cards += f"""<a class="service-card" href="/services/{s['slug']}/">
-  <span class="eyebrow">{esc(s['tag'])}</span>
-  <h2>{esc(s['name'])}</h2>
-  <p>{esc(s['desc'])}</p>
-  <span class="price">{price_label}</span>
-</a>"""
-    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Repair services", None)])
-    title = "Phone Repair Services — Sydney | Phone Repair Near Me"
-    desc = "Screen, battery, charging port, back glass, camera and water damage repair — compared across Greater Sydney."
-    main_html = f"""
-<div class="wrap narrow">{crumb_html}</div>
-<section class="hero-suburb wrap narrow">
-  <h1>Whatever broke, someone nearby fixes it.</h1>
-</section>
-<section class="wrap narrow"><div class="service-grid">{cards}</div></section>
-"""
-    write("services/index.html", page(title, desc, path, main_html, [crumb_ld]))
+    write(f"{svc['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, service_ld]))
 
 
 def build_home():
@@ -440,14 +408,14 @@ def build_home():
     service_cards = ""
     for s in D.SERVICES:
         price_label = f"From ${s['price']}" if s['price'] else "Free diagnosis"
-        service_cards += f"""<a class="service-card" href="/services/{s['slug']}/">
+        service_cards += f"""<a class="service-card" href="/{s['slug']}/">
   <span class="eyebrow">{esc(s['tag'])}</span>
   <h2>{esc(s['name'])}</h2>
   <p>{esc(s['desc'])}</p>
   <span class="price">{price_label}</span>
 </a>"""
     region_cards = "".join(
-        f'<a class="region-card" href="/sydney/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
+        f'<a class="region-card" href="/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
         for r in D.REGIONS
     )
     faq_html = "".join(f"""<details class="faq">
@@ -473,7 +441,7 @@ def build_home():
   <p class="eyebrow">Every Sydney suburb. One search.</p>
   <h1>Phone repair.<br>Near you. Today.</h1>
   <p class="lede">Compare trusted local repairers for cracked screens, tired batteries and everything in between.</p>
-  <form class="search-form" id="suburb-search" action="/sydney/" role="search">
+  <form class="search-form" id="suburb-search" role="search">
     <input type="search" id="suburb-search-input" placeholder="Enter your suburb or postcode" aria-label="Suburb or postcode" autocomplete="off">
     <button type="submit">Search</button>
     <div id="suburb-search-results" class="search-results" hidden></div>
@@ -506,7 +474,6 @@ def build_home():
     <h2>Find repair in your suburb.</h2>
     <p class="lede">{len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions of Greater Sydney.</p>
     <div class="region-grid">{region_cards}</div>
-    <p><a href="/sydney/">Browse the full suburb directory &rsaquo;</a></p>
   </div>
 </section>
 
@@ -555,7 +522,7 @@ def build_404():
     main_html = """
 <section class="wrap narrow prose" style="text-align:center;padding:80px 22px">
   <h1>Page not found</h1>
-  <p>That page doesn't exist. Try the <a href="/sydney/">suburb directory</a> or go back <a href="/">home</a>.</p>
+  <p>That page doesn't exist. Try the <a href="/#suburbs">suburb directory</a> or go back <a href="/">home</a>.</p>
 </section>
 """
     write("404.html", page("Page not found — Phone Repair Near Me", "Page not found.", "/404.html", main_html))
@@ -718,12 +685,12 @@ MAIN_JS = """
     }).filter(function(x){ return x.score < 9; }).sort(function(a, b){ return a.score - b.score || a.s.n.localeCompare(b.s.n); }).slice(0, 6);
     current = scored.map(function(x){ return x.s; });
     if (!current.length) return;
-    results.innerHTML = current.map(function(s){ return '<a href="/sydney/' + s.s + '/">' + s.n + '<span class="muted">' + s.r + '</span></a>'; }).join('');
+    results.innerHTML = current.map(function(s){ return '<a href="/' + s.s + '/">' + s.n + '<span class="muted">' + s.r + '</span></a>'; }).join('');
     results.hidden = false;
   });
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    if (current.length) window.location.href = '/sydney/' + current[0].s + '/';
+    if (current.length) window.location.href = '/' + current[0].s + '/';
   });
   document.addEventListener('click', function(e){ if (!form.contains(e.target)) results.hidden = true; });
 })();
@@ -748,22 +715,28 @@ def build_sitemap():
 
 
 def build_llms_txt():
+    region_links = "\n".join(f"- [{r}]({D.DOMAIN}/{REGION_SLUG[r]}/)" for r in D.REGIONS)
+    service_links = "\n".join(f"- [{s['name']}]({D.DOMAIN}/{s['slug']}/)" for s in D.SERVICES)
     write("llms.txt", f"""# {D.SITE_NAME}
 
 > Independent directory of phone repair shops across Greater Sydney, NSW. Compare screen, battery, charging port, back glass, camera and water-damage repair options by suburb, with store distance, hours and contact details.
 
-Phone Repair Near Me helps people in any Sydney suburb find the closest listed phone repair store, see indicative pricing and get directions or a phone number. The directory is independent of any phone manufacturer.
+Phone Repair Near Me helps people in any Sydney suburb find the closest listed phone repair store, see indicative pricing and get directions or a phone number. The directory is independent of any phone manufacturer. Every suburb and region has its own page at the site root, e.g. {D.DOMAIN}/bondi-beach/ — there is no /sydney/ or /services/ path prefix.
 
-## Key pages
+## Regions ({len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions — each region page lists every suburb in it)
+{region_links}
+
+## Repair services
+{service_links}
+
+## Other pages
 - [Home]({D.DOMAIN}/): overview and suburb search
-- [All Sydney suburbs]({D.DOMAIN}/sydney/): full directory grouped by region ({len(D.SUBURBS)} suburbs, {len(D.REGIONS)} regions)
-- [Repair services]({D.DOMAIN}/services/): screen, battery, charging port, back glass, camera, water damage
 - [About]({D.DOMAIN}/about/)
 - [List your shop]({D.DOMAIN}/list-your-shop/): for repair businesses that want to be listed
 - [Full sitemap]({D.DOMAIN}/sitemap.xml): every suburb, region and service URL
 
 ## Notes
-- Each suburb page (`{D.DOMAIN}/sydney/<suburb>/`) ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
+- Each suburb page ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
 - Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of {TODAY}, so distances on far suburb pages can be large — this is disclosed on the page itself.
 - Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.
 """)
@@ -777,10 +750,8 @@ def main():
         build_suburb_page(suburb)
     for region in D.REGIONS:
         build_region_page(region)
-    build_sydney_index()
     for svc in D.SERVICES:
         build_service_page(svc)
-    build_services_index()
     build_static_pages()
     build_404()
     build_robots()
