@@ -64,7 +64,8 @@ def haversine(a, b):
 # regions/services fall back to a suffixed slug on collision (e.g. the
 # "Penrith" region vs. the "Penrith" suburb both slugify to "penrith").
 RESERVED_SLUGS = {'about', 'contact', 'privacy', 'list-your-shop', 'assets',
-                   'tools', 'legacy-artifact', 'sitemap', 'robots', 'llms', '404'}
+                   'tools', 'legacy-artifact', 'sitemap', 'robots', 'llms', '404',
+                   'repairs', 'suburbs'}
 _used = set(RESERVED_SLUGS)
 
 for s in D.SUBURBS:
@@ -112,20 +113,26 @@ LEAFLET_CSS = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist
 LEAFLET_JS = '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>\n'
 
 NAV_LINKS = [
-    ("Repairs", "/#repairs"),
-    ("Suburbs", "/#suburbs"),
-    ("iPhone", "/#repairs"),
-    ("Samsung", "/#repairs"),
-    ("For shops", "#"),
+    ("Repairs", "/repairs/"),
+    ("Suburbs", "/suburbs/"),
+    ("iPhone", "/repairs/"),
+    ("Samsung", "/repairs/"),
 ]
 
 
-def head(title, description, canonical_path, extra_jsonld=None, extra_head=""):
+def head(title, description, canonical_path, extra_jsonld=None, extra_head="", geo=None):
     canonical = D.DOMAIN + canonical_path
     jsonld = ""
     if extra_jsonld:
         for block in extra_jsonld:
             jsonld += f'<script type="application/ld+json">{json.dumps(block, ensure_ascii=False)}</script>\n'
+    geo_tags = ""
+    if geo:
+        lat, lng, placename = geo
+        geo_tags = (f'<meta name="geo.region" content="AU-NSW">\n'
+                    f'<meta name="geo.placename" content="{esc(placename)}">\n'
+                    f'<meta name="geo.position" content="{lat};{lng}">\n'
+                    f'<meta name="ICBM" content="{lat}, {lng}">\n')
     return f"""<!doctype html>
 <html lang="en-AU">
 <head>
@@ -141,7 +148,7 @@ def head(title, description, canonical_path, extra_jsonld=None, extra_head=""):
 <meta property="og:url" content="{canonical}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="/assets/style.css">
+{geo_tags}<link rel="stylesheet" href="/assets/style.css">
 {extra_head}{jsonld}</head>
 <body>
 """
@@ -154,7 +161,7 @@ def header_html():
     <a href="/" class="brand"><span class="brand-mark">P</span><span class="brand-text">phonerepair<span class="muted">nearme</span></span></a>
     <div class="nav-links" id="nav-links">{links}</div>
     <div class="nav-right">
-      <a class="btn-primary btn-pill" href="/#search">Find a repairer</a>
+      <a class="btn-primary btn-pill" href="/suburbs/">Find a repairer</a>
       <button class="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">&#9776;</button>
     </div>
   </nav>
@@ -165,9 +172,9 @@ def header_html():
 def footer_html():
     cols = [
         ("Repairs", [(s['name'], f"/{s['slug']}/") for s in D.SERVICES]),
-        ("Brands", [(b, "/#repairs") for b in D.BRANDS]),
+        ("Brands", [(b, "/repairs/") for b in D.BRANDS]),
         ("Regions", [(r, f"/{REGION_SLUG[r]}/") for r in D.REGIONS[:6]]),
-        ("Company", [("About", None), ("List your shop", None), ("Contact", None), ("Privacy", None)]),
+        ("Company", [("About", "/about/"), ("List your shop", "/list-your-shop/"), ("Contact", "/contact/"), ("Privacy", "/privacy/")]),
     ]
     cols_html = ""
     for title, items in cols:
@@ -203,8 +210,8 @@ def breadcrumb(items):
     return html, jsonld
 
 
-def page(title, description, canonical_path, main_html, extra_jsonld=None, extra_head="", extra_foot=""):
-    return (head(title, description, canonical_path, extra_jsonld, extra_head) + header_html()
+def page(title, description, canonical_path, main_html, extra_jsonld=None, extra_head="", extra_foot="", geo=None):
+    return (head(title, description, canonical_path, extra_jsonld, extra_head, geo) + header_html()
             + f'<main>{main_html}</main>' + footer_html() + extra_foot
             + '<script src="/assets/main.js"></script>\n</body>\n</html>\n')
 
@@ -278,6 +285,23 @@ def suburb_intro(suburb):
     return INTRO_VARIANTS[suburb['id'] % len(INTRO_VARIANTS)].format(region=suburb['region'])
 
 
+def suburb_faqs(suburb, ranked):
+    name, postcode = suburb['name'], suburb['postcode']
+    nearest_dist, nearest_shop = ranked[0]
+    items = [{
+        'q': f"Is there phone repair near me in {name}?",
+        'a': f"Yes — phone repair near me in {name} NSW {postcode} is available at {nearest_shop['name']}, about {nearest_dist:.1f} km away. Compare every listed repairer above, ranked by distance from {name}.",
+    }]
+    for s in D.SERVICES:
+        price_label = f"from ${s['price']}" if s['price'] else "with a free diagnosis"
+        svc_phrase = s['slug'].replace('-', ' ')
+        items.append({
+            'q': f"Where can I get {svc_phrase} in {name}?",
+            'a': f"{s['name']} near {name} is available {price_label} from the repairers listed above. {s['desc']}",
+        })
+    return items
+
+
 # ---------------------------------------------------------------------------
 # Pages
 # ---------------------------------------------------------------------------
@@ -303,6 +327,19 @@ def build_suburb_page(suburb):
         ("Home", "/"), (suburb['region'], f"/{REGION_SLUG[suburb['region']]}/"), (suburb['name'], None),
     ])
 
+    faqs = suburb_faqs(suburb, ranked)
+    faq_html = "".join(f"""<details class="faq">
+  <summary>{esc(f['q'])}</summary>
+  <p>{esc(f['a'])}</p>
+</details>""" for f in faqs)
+    faq_ld = {
+        "@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": f['q'], "acceptedAnswer": {"@type": "Answer", "text": f['a']}}
+            for f in faqs
+        ],
+    }
+
     shops_ld = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -313,6 +350,7 @@ def build_suburb_page(suburb):
                     "@type": "LocalBusiness", "name": sh['name'],
                     "address": sh['address'], "telephone": sh['phone'],
                     "url": sh['url'],
+                    "geo": {"@type": "GeoCoordinates", "latitude": sh['ll'][0], "longitude": sh['ll'][1]},
                 },
             }
             for i, (d, sh) in enumerate(ranked)
@@ -352,9 +390,15 @@ def build_suburb_page(suburb):
   <div class="chip-row">{nearby_html}</div>
   <p><a href="/{REGION_SLUG[suburb['region']]}/">See all of {esc(suburb['region'])} &rsaquo;</a></p>
 </section>
+<section class="wrap narrow faqs">
+  <h2>Phone repair in {esc(suburb['name'])}, answered.</h2>
+  {faq_html}
+</section>
 """
-    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld],
-          extra_head=LEAFLET_CSS, extra_foot=LEAFLET_JS))
+    here_ll = suburb_coord(suburb)
+    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld, faq_ld],
+          extra_head=LEAFLET_CSS, extra_foot=LEAFLET_JS,
+          geo=(here_ll[0], here_ll[1], f"{suburb['name']}, NSW")))
 
 
 def build_region_page(region):
@@ -377,7 +421,7 @@ def build_region_page(region):
 </section>
 <section class="wrap narrow">
   <ul class="suburb-grid">{items}</ul>
-  <p><a href="/#suburbs">&larr; All regions</a></p>
+  <p><a href="/suburbs/">&larr; All regions</a></p>
 </section>
 """
     write(f"{slug}/index.html", page(title, desc, path, main_html, [crumb_ld]))
@@ -407,7 +451,7 @@ def build_service_page(svc):
   <h2>Available across Greater Sydney</h2>
   <p>Find a {esc(svc['name'].lower())} repairer near you by suburb or browse by region:</p>
   <div class="link-grid">{region_links}</div>
-  <p><a href="/#suburbs">Browse all suburbs &rsaquo;</a></p>
+  <p><a href="/suburbs/">Browse all suburbs &rsaquo;</a></p>
 </section>
 """
     write(f"{svc['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, service_ld]))
@@ -457,8 +501,8 @@ def build_home():
     <button type="submit">Search</button>
     <div id="suburb-search-results" class="search-results" hidden></div>
   </form>
-  <p class="quick-links"><a href="#repairs">Browse repairs &rsaquo;</a> <a href="#suburbs">All suburbs &rsaquo;</a></p>
-  <div class="hero-image"><div class="image-slot">Hero image &mdash; phone being repaired, shot from above</div></div>
+  <p class="quick-links"><a href="/repairs/">Browse repairs &rsaquo;</a> <a href="/suburbs/">All suburbs &rsaquo;</a></p>
+  <div class="hero-image"><img src="/assets/hero-repair.svg" width="1600" height="800" alt="Top-down view of a phone being repaired, with the back open showing the battery and logic board, a screwdriver, tweezers and a tray of screws nearby" loading="eager"></div>
 </section>
 
 <section id="repairs" class="band-light">
@@ -497,11 +541,184 @@ def build_home():
     write("index.html", page(title, desc, path, main_html, [website_ld, faq_ld]))
 
 
+def build_repairs_index():
+    path = "/repairs/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Repairs", None)])
+    title = "Phone Repair Services — Screen, Battery & More | Phone Repair Near Me"
+    desc = "Browse every phone repair service covered by listed Sydney repairers: screen, battery, charging port, back glass, camera and water damage."
+    service_cards = ""
+    for s in D.SERVICES:
+        price_label = f"From ${s['price']}" if s['price'] else "Free diagnosis"
+        service_cards += f"""<a class="service-card" href="/{s['slug']}/">
+  <span class="eyebrow">{esc(s['tag'])}</span>
+  <h2>{esc(s['name'])}</h2>
+  <p>{esc(s['desc'])}</p>
+  <span class="price">{price_label}</span>
+</a>"""
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">Every repair, one directory</p>
+  <h1>Phone repairs.</h1>
+  <p class="lede">Whatever broke, someone nearby fixes it. Pick a repair to see listed Sydney repairers and indicative pricing.</p>
+</section>
+<section class="wrap narrow">
+  <div class="service-grid">{service_cards}</div>
+</section>
+"""
+    write("repairs/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
+def build_suburbs_index():
+    path = "/suburbs/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Suburbs", None)])
+    title = "Find Phone Repair by Suburb — Greater Sydney | Phone Repair Near Me"
+    desc = f"Search phone repair by suburb or browse all {len(D.REGIONS)} regions of Greater Sydney, covering {len(D.SUBURBS)} suburbs."
+    region_cards = "".join(
+        f'<a class="region-card" href="/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
+        for r in D.REGIONS
+    )
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">Greater Sydney</p>
+  <h1>Find repair in your suburb.</h1>
+  <p class="lede">{len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions. Search yours, or browse by region below.</p>
+  <form class="search-form" id="search" role="search">
+    <input type="search" id="suburb-search-input" placeholder="Enter your suburb or postcode" aria-label="Suburb or postcode" autocomplete="off">
+    <button type="submit">Search</button>
+    <div id="suburb-search-results" class="search-results" hidden></div>
+  </form>
+</section>
+<section class="wrap narrow">
+  <div class="region-grid">{region_cards}</div>
+</section>
+"""
+    write("suburbs/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
+def build_contact():
+    path = "/contact/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Contact", None)])
+    title = "Contact — Phone Repair Near Me"
+    desc = "How to get in touch with Phone Repair Near Me, or with a listed repair store directly."
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">Get in touch</p>
+  <h1>Contact.</h1>
+  <p class="lede">For a repair, the fastest way is to contact the store directly &mdash; every listing has a call or directions button.</p>
+</section>
+<section class="wrap narrow prose">
+  <p>Want to get your shop listed? Use the <a href="/list-your-shop/">list your shop</a> form and we'll be in touch.</p>
+  <p>For anything else about this directory, reach the listed store nearest you &mdash; each listing includes a phone number or store page.</p>
+</section>
+"""
+    write("contact/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
+def build_list_your_shop():
+    path = "/list-your-shop/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("List your shop", None)])
+    title = "List Your Repair Shop — Get Found by Local Customers | Phone Repair Near Me"
+    desc = "List your phone repair shop on Phone Repair Near Me and get found by customers searching by suburb across Greater Sydney. Free to list, no obligation."
+
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">For repair businesses</p>
+  <h1>List your shop.</h1>
+  <p class="lede">Get found by customers searching for phone repair in your suburb. Tell us about your shop below &mdash; it's free to be listed.</p>
+  <div class="hero-image"><img src="/assets/list-your-shop-hero.svg" width="1200" height="600" alt="Illustration of a phone repair storefront with a signup checklist, representing a shop being added to the directory" loading="lazy"></div>
+</section>
+<section class="band-light">
+  <div class="wrap narrow">
+    <h2>Why list with us.</h2>
+    <div class="benefit-grid">
+      <div class="benefit-card" data-reveal="1"><h3>Free to list</h3><p>No cost and no obligation to add your shop to the directory.</p></div>
+      <div class="benefit-card" data-reveal="1"><h3>Ranked by distance</h3><p>Customers see your shop sorted by how close it is to them, suburb by suburb.</p></div>
+      <div class="benefit-card" data-reveal="1"><h3>Simple to update</h3><p>Send us new hours, services or details any time and we'll update your listing.</p></div>
+    </div>
+  </div>
+</section>
+<section class="wrap narrow">
+  <h2>Tell us about your shop</h2>
+  <form class="form-card" id="list-shop-form">
+    <div class="form-grid">
+      <label class="field"><span>Business name</span><input type="text" name="business-name" required></label>
+      <label class="field"><span>Your name</span><input type="text" name="contact-name" required></label>
+      <label class="field"><span>Email</span><input type="email" name="email" required></label>
+      <label class="field"><span>Phone number</span><input type="tel" name="phone" required></label>
+      <label class="field full"><span>Suburb</span><input type="text" name="suburb" required></label>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn-primary">Submit listing request</button></div>
+  </form>
+  <div class="form-success" id="list-shop-success" hidden>
+    <h2>Thanks &mdash; we've got your details.</h2>
+    <p class="lede">We'll review your shop and get back to you within 2 business days.</p>
+    <button type="button" class="btn-outline" id="list-shop-again">Submit another shop</button>
+  </div>
+</section>
+"""
+    write("list-your-shop/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
+def build_about():
+    path = "/about/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("About", None)])
+    title = "About — Phone Repair Near Me"
+    desc = "Phone Repair Near Me is an independent directory built to make finding phone repair services near you easier, suburb by suburb across Greater Sydney."
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">About us</p>
+  <h1>About Phone Repair Near Me.</h1>
+  <p class="lede">An independent directory built to make finding phone repair services near you easier.</p>
+</section>
+<section class="wrap narrow prose">
+  <p>Phone Repair Near Me exists for one reason: to make finding a phone repair service nearby easier. We cover every suburb and region across Greater Sydney, ranking listed repairers by distance so you can see who's closest, what they fix and whether they're open right now.</p>
+  <p>We're independent &mdash; not affiliated with Apple, Samsung, Google or any other phone manufacturer. Listings are maintained directly with the businesses shown.</p>
+  <p>Run a repair shop? <a href="/list-your-shop/">List your shop</a> to get found by customers searching in your suburb.</p>
+</section>
+"""
+    write("about/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
+def build_privacy():
+    path = "/privacy/"
+    register(path)
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Privacy", None)])
+    title = "Privacy Policy — Phone Repair Near Me"
+    desc = "How Phone Repair Near Me collects and uses information, including details submitted through the list your shop form."
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">Legal</p>
+  <h1>Privacy policy.</h1>
+  <p class="lede">This directory is built to make finding phone repair services easier &mdash; here's how we handle the limited information we collect along the way.</p>
+</section>
+<section class="wrap narrow prose">
+  <h2>What we collect</h2>
+  <p>Browsing the directory itself doesn't require an account or any personal details. If you submit the "list your shop" form, we collect what you enter &mdash; business name, contact name, email, phone number and suburb &mdash; so we can review and add your listing.</p>
+  <h2>How we use it</h2>
+  <p>Information submitted through the listing form is used only to review, add and maintain your shop's listing on this directory. We don't sell or share it with third parties for marketing.</p>
+  <h2>Contact</h2>
+  <p>If you have questions about this policy or want a listing removed, get in touch using the details on this site.</p>
+</section>
+"""
+    write("privacy/index.html", page(title, desc, path, main_html, [crumb_ld]))
+
+
 def build_404():
     main_html = """
 <section class="wrap narrow prose" style="text-align:center;padding:80px 22px">
   <h1>Page not found</h1>
-  <p>That page doesn't exist. Try the <a href="/#suburbs">suburb directory</a> or go back <a href="/">home</a>.</p>
+  <p>That page doesn't exist. Try the <a href="/suburbs/">suburb directory</a> or go back <a href="/">home</a>.</p>
 </section>
 """
     write("404.html", page("Page not found — Phone Repair Near Me", "Page not found.", "/404.html", main_html))
@@ -515,6 +732,8 @@ def build_assets():
     write("assets/style.css", STYLE_CSS)
     write("assets/main.js", MAIN_JS)
     write("assets/favicon.svg", FAVICON_SVG)
+    write("assets/hero-repair.svg", HERO_SVG)
+    write("assets/list-your-shop-hero.svg", LIST_SHOP_HERO_SVG)
     suburb_index = [{"n": s['name'], "s": s['slug'], "r": s['region'], "p": s['postcode']} for s in D.SUBURBS]
     write("assets/suburbs.json", json.dumps(suburb_index, ensure_ascii=False))
 
@@ -545,7 +764,6 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 @media(max-width:360px){.btn-pill{padding:5px 9px;font-size:11px}.nav-wrap{gap:8px}}
 .hero{text-align:center;padding:72px 22px 0;overflow:hidden}
 .hero-image{width:100%;max-width:1100px;margin:clamp(40px,6vw,72px) auto 0;aspect-ratio:16/8;min-height:260px;border-radius:28px 28px 0 0;overflow:hidden}
-.image-slot{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(180deg,#f5f5f7,#e8e8ed);color:var(--muted);font-size:14px;text-align:center;padding:16px}
 .hero h1{font-size:clamp(40px,8vw,88px)}
 .eyebrow{color:var(--warn);font-weight:600;margin:0 0 8px}
 .eyebrow.center{text-align:center}
@@ -626,6 +844,23 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .footer-cols ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .footer-cols a{color:#424245}
 .footer-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px}
+.hero-image img{width:100%;height:100%;object-fit:cover;display:block}
+.benefit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:18px;margin-top:36px}
+.benefit-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+.benefit-card h3{font-size:17px;margin-bottom:8px}
+.benefit-card p{color:var(--sub);font-size:14px;margin:0}
+.form-card{background:var(--bg-light);border-radius:24px;padding:clamp(24px,4vw,40px);margin-top:24px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.field.full{grid-column:1/-1}
+.field input,.field textarea{width:100%;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.field textarea{resize:vertical;min-height:90px}
+.checkbox-grid{display:flex;flex-wrap:wrap;gap:10px 12px}
+.checkbox-grid label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:400;background:#fff;border:1px solid var(--line);border-radius:980px;padding:8px 16px}
+.form-actions{margin-top:24px;display:flex;justify-content:flex-end}
+.form-actions button{border:0;cursor:pointer}
+.form-success{text-align:center;padding:40px 20px}
+.form-success button{border:0;cursor:pointer}
 """
 
 MAIN_JS = """
@@ -694,7 +929,23 @@ MAIN_JS = """
         L.marker(s.ll).addTo(map).bindPopup('<strong>' + s.name + '</strong><br><a href="' + s.maps + '" target="_blank" rel="noopener">Directions</a>');
       });
       map.fitBounds(bounds, { padding: [28, 28] });
-    } catch (e) { /* leave the aside empty if the map fails to init */ }
+    } catch (e) {}
+  }
+
+  var shopForm = document.getElementById('list-shop-form');
+  if (shopForm) {
+    var shopSuccess = document.getElementById('list-shop-success');
+    shopForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      shopForm.hidden = true;
+      if (shopSuccess) shopSuccess.hidden = false;
+    });
+    var shopAgain = document.getElementById('list-shop-again');
+    if (shopAgain) shopAgain.addEventListener('click', function(){
+      shopForm.reset();
+      shopForm.hidden = false;
+      if (shopSuccess) shopSuccess.hidden = true;
+    });
   }
 
   var input = document.getElementById('suburb-search-input');
@@ -728,6 +979,101 @@ MAIN_JS = """
 """
 
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1d1d1f"/><text x="32" y="44" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#fff">P</text></svg>"""
+
+HERO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" role="img" aria-label="Top-down illustration of a phone being repaired, with the back open showing the battery and logic board, a screwdriver, tweezers and a tray of screws nearby">
+<defs>
+<linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f5f5f7"/>
+<stop offset="1" stop-color="#ffffff"/>
+</linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#2997ff"/>
+<stop offset="1" stop-color="#0071e3"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="800" fill="url(#bg2)"/>
+<rect x="940" y="120" width="300" height="600" rx="42" fill="url(#glass)" transform="rotate(8 1090 420)"/>
+<rect x="960" y="150" width="60" height="540" rx="30" fill="#ffffff" opacity="0.18" transform="rotate(8 1090 420)"/>
+<path d="M1150 260l40 60-30 90" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.5" transform="rotate(8 1090 420)"/>
+<rect x="560" y="120" width="340" height="600" rx="46" fill="#e5e5ea" stroke="#d2d2d7" stroke-width="3"/>
+<rect x="700" y="150" width="60" height="10" rx="5" fill="#c7c7cc"/>
+<circle cx="800" cy="155" r="7" fill="#c7c7cc"/>
+<rect x="590" y="190" width="280" height="230" rx="22" fill="#eaf2fc" stroke="#0071e3" stroke-width="3"/>
+<rect x="710" y="178" width="40" height="16" rx="6" fill="#eaf2fc" stroke="#0071e3" stroke-width="3"/>
+<rect x="612" y="212" width="236" height="186" rx="12" fill="#ffffff"/>
+<rect x="628" y="228" width="140" height="154" rx="8" fill="#0071e3"/>
+<rect x="590" y="440" width="280" height="250" rx="18" fill="#ffffff" stroke="#1d1d1f" stroke-width="2"/>
+<rect x="614" y="464" width="60" height="44" rx="6" fill="#1d1d1f"/>
+<rect x="690" y="464" width="100" height="44" rx="6" fill="#1d1d1f"/>
+<rect x="614" y="522" width="156" height="30" rx="6" fill="#1d1d1f"/>
+<path d="M614 570h236M614 594h180M614 618h236M614 642h150" stroke="#d2d2d7" stroke-width="4" stroke-linecap="round"/>
+<circle cx="820" cy="470" r="10" fill="#0071e3"/>
+<g transform="rotate(-35 430 260)">
+<rect x="380" y="150" width="28" height="220" rx="14" fill="#1d1d1f"/>
+<rect x="372" y="140" width="44" height="40" rx="10" fill="#1d1d1f"/>
+<rect x="388" y="364" width="12" height="18" fill="#8e8e93"/>
+</g>
+<g transform="rotate(20 1220 640)">
+<path d="M1190 560l20 150-14 40" fill="none" stroke="#1d1d1f" stroke-width="10" stroke-linecap="round"/>
+<path d="M1230 560l-20 150 14 40" fill="none" stroke="#1d1d1f" stroke-width="10" stroke-linecap="round"/>
+</g>
+<rect x="200" y="540" width="220" height="130" rx="20" fill="#ffffff" stroke="#d2d2d7" stroke-width="3"/>
+<circle cx="250" cy="580" r="10" fill="#86868b"/>
+<circle cx="290" cy="605" r="10" fill="#86868b"/>
+<circle cx="330" cy="580" r="10" fill="#86868b"/>
+<circle cx="370" cy="610" r="10" fill="#86868b"/>
+<circle cx="250" cy="625" r="10" fill="#86868b"/>
+<circle cx="1420" cy="190" r="60" fill="#0071e3"/>
+<path d="M1394 192l18 18 36-40" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="180" cy="200" r="7" fill="#d2d2d7"/>
+<circle cx="1480" cy="520" r="7" fill="#d2d2d7"/>
+<circle cx="900" cy="80" r="6" fill="#d2d2d7"/>
+</svg>"""
+
+LIST_SHOP_HERO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Illustration of a phone repair storefront with a signup checklist">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#f5f5f7"/>
+<stop offset="1" stop-color="#ffffff"/>
+</linearGradient>
+<pattern id="awning" width="30" height="30" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+<rect width="15" height="30" fill="#1d1d1f"/>
+<rect x="15" width="15" height="30" fill="#0071e3"/>
+</pattern>
+</defs>
+<rect width="1200" height="600" fill="url(#bg)"/>
+<ellipse cx="520" cy="538" rx="360" ry="20" fill="#e5e5ea"/>
+<rect x="120" y="522" width="960" height="4" rx="2" fill="#d2d2d7"/>
+<rect x="250" y="230" width="460" height="290" rx="20" fill="#ffffff" stroke="#d2d2d7" stroke-width="2"/>
+<rect x="236" y="186" width="488" height="52" rx="10" fill="url(#awning)"/>
+<rect x="236" y="230" width="488" height="14" fill="#1d1d1f"/>
+<rect x="430" y="140" width="150" height="56" rx="28" fill="#1d1d1f"/>
+<circle cx="505" cy="168" r="16" fill="#0071e3"/>
+<path d="M497 168l5 6 11-13" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="286" y="268" width="150" height="180" rx="14" fill="#e8f1fc" stroke="#0071e3" stroke-width="2"/>
+<rect x="331" y="298" width="60" height="118" rx="10" fill="#1d1d1f"/>
+<rect x="337" y="306" width="48" height="84" rx="3" fill="#eef4fb"/>
+<circle cx="361" cy="402" r="4" fill="#eef4fb"/>
+<path d="M322 352l40-26 10 14-40 26z" fill="#0071e3" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="322" cy="352" r="7" fill="#0071e3" stroke="#ffffff" stroke-width="3"/>
+<rect x="462" y="310" width="100" height="166" rx="8" fill="#1d1d1f"/>
+<rect x="470" y="318" width="84" height="40" rx="4" fill="#2c2c2e"/>
+<circle cx="545" cy="393" r="5" fill="#ffffff"/>
+<rect x="594" y="268" width="130" height="180" rx="14" fill="#fdf2e9" stroke="#bf4800" stroke-width="2"/>
+<rect x="616" y="292" width="86" height="118" rx="8" fill="#ffffff" stroke="#1d1d1f" stroke-width="2"/>
+<rect x="638" y="282" width="42" height="18" rx="4" fill="#bf4800"/>
+<rect x="628" y="316" width="66" height="8" rx="4" fill="#d2d2d7"/>
+<rect x="628" y="336" width="66" height="8" rx="4" fill="#d2d2d7"/>
+<rect x="628" y="356" width="40" height="8" rx="4" fill="#d2d2d7"/>
+<circle cx="686" cy="396" r="18" fill="#0071e3"/>
+<path d="M678 396l6 6 13-14" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="960" cy="200" r="54" fill="#0071e3"/>
+<path d="M938 202l16 16 32-36" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="200" cy="150" r="6" fill="#d2d2d7"/>
+<circle cx="860" cy="430" r="6" fill="#d2d2d7"/>
+<circle cx="1000" cy="340" r="5" fill="#d2d2d7"/>
+<circle cx="170" cy="400" r="5" fill="#d2d2d7"/>
+</svg>"""
 
 
 def build_robots():
@@ -783,6 +1129,12 @@ def main():
         build_region_page(region)
     for svc in D.SERVICES:
         build_service_page(svc)
+    build_repairs_index()
+    build_suburbs_index()
+    build_contact()
+    build_list_your_shop()
+    build_about()
+    build_privacy()
     build_404()
     build_robots()
     build_sitemap()

@@ -39,5 +39,5 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 
 ## Notes
 - Each suburb page ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
-- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-10-29, so distances on far suburb pages can be large — this is disclosed on the page itself.
+- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-10-31, so distances on far suburb pages can be large — this is disclosed on the page itself.
 - Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.

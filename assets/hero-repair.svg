@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" role="img" aria-label="Top-down illustration of a phone being repaired, with the back open showing the battery and logic board, a screwdriver, tweezers and a tray of screws nearby">
+<defs>
+<linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f5f5f7"/>
+<stop offset="1" stop-color="#ffffff"/>
+</linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#2997ff"/>
+<stop offset="1" stop-color="#0071e3"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="800" fill="url(#bg2)"/>
+<rect x="940" y="120" width="300" height="600" rx="42" fill="url(#glass)" transform="rotate(8 1090 420)"/>
+<rect x="960" y="150" width="60" height="540" rx="30" fill="#ffffff" opacity="0.18" transform="rotate(8 1090 420)"/>
+<path d="M1150 260l40 60-30 90" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.5" transform="rotate(8 1090 420)"/>
+<rect x="560" y="120" width="340" height="600" rx="46" fill="#e5e5ea" stroke="#d2d2d7" stroke-width="3"/>
+<rect x="700" y="150" width="60" height="10" rx="5" fill="#c7c7cc"/>
+<circle cx="800" cy="155" r="7" fill="#c7c7cc"/>
+<rect x="590" y="190" width="280" height="230" rx="22" fill="#eaf2fc" stroke="#0071e3" stroke-width="3"/>
+<rect x="710" y="178" width="40" height="16" rx="6" fill="#eaf2fc" stroke="#0071e3" stroke-width="3"/>
+<rect x="612" y="212" width="236" height="186" rx="12" fill="#ffffff"/>
+<rect x="628" y="228" width="140" height="154" rx="8" fill="#0071e3"/>
+<rect x="590" y="440" width="280" height="250" rx="18" fill="#ffffff" stroke="#1d1d1f" stroke-width="2"/>
+<rect x="614" y="464" width="60" height="44" rx="6" fill="#1d1d1f"/>
+<rect x="690" y="464" width="100" height="44" rx="6" fill="#1d1d1f"/>
+<rect x="614" y="522" width="156" height="30" rx="6" fill="#1d1d1f"/>
+<path d="M614 570h236M614 594h180M614 618h236M614 642h150" stroke="#d2d2d7" stroke-width="4" stroke-linecap="round"/>
+<circle cx="820" cy="470" r="10" fill="#0071e3"/>
+<g transform="rotate(-35 430 260)">
+<rect x="380" y="150" width="28" height="220" rx="14" fill="#1d1d1f"/>
+<rect x="372" y="140" width="44" height="40" rx="10" fill="#1d1d1f"/>
+<rect x="388" y="364" width="12" height="18" fill="#8e8e93"/>
+</g>
+<g transform="rotate(20 1220 640)">
+<path d="M1190 560l20 150-14 40" fill="none" stroke="#1d1d1f" stroke-width="10" stroke-linecap="round"/>
+<path d="M1230 560l-20 150 14 40" fill="none" stroke="#1d1d1f" stroke-width="10" stroke-linecap="round"/>
+</g>
+<rect x="200" y="540" width="220" height="130" rx="20" fill="#ffffff" stroke="#d2d2d7" stroke-width="3"/>
+<circle cx="250" cy="580" r="10" fill="#86868b"/>
+<circle cx="290" cy="605" r="10" fill="#86868b"/>
+<circle cx="330" cy="580" r="10" fill="#86868b"/>
+<circle cx="370" cy="610" r="10" fill="#86868b"/>
+<circle cx="250" cy="625" r="10" fill="#86868b"/>
+<circle cx="1420" cy="190" r="60" fill="#0071e3"/>
+<path d="M1394 192l18 18 36-40" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="180" cy="200" r="7" fill="#d2d2d7"/>
+<circle cx="1480" cy="520" r="7" fill="#d2d2d7"/>
+<circle cx="900" cy="80" r="6" fill="#d2d2d7"/>
+</svg>

@@ -64,7 +64,23 @@
         L.marker(s.ll).addTo(map).bindPopup('<strong>' + s.name + '</strong><br><a href="' + s.maps + '" target="_blank" rel="noopener">Directions</a>');
       });
       map.fitBounds(bounds, { padding: [28, 28] });
-    } catch (e) { /* leave the aside empty if the map fails to init */ }
+    } catch (e) {}
+  }
+
+  var shopForm = document.getElementById('list-shop-form');
+  if (shopForm) {
+    var shopSuccess = document.getElementById('list-shop-success');
+    shopForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      shopForm.hidden = true;
+      if (shopSuccess) shopSuccess.hidden = false;
+    });
+    var shopAgain = document.getElementById('list-shop-again');
+    if (shopAgain) shopAgain.addEventListener('click', function(){
+      shopForm.reset();
+      shopForm.hidden = false;
+      if (shopSuccess) shopSuccess.hidden = true;
+    });
   }
 
   var input = document.getElementById('suburb-search-input');
