@@ -1,10 +1,28 @@
 # Phone Repair Near Me
 
-> Independent directory of phone repair shops across Greater Sydney, NSW. Compare screen, battery, charging port, back glass, camera and water-damage repair options by suburb, with store distance, hours and contact details.
+> מדריך עצמאי של חנויות לתיקון טלפונים בכל רחבי סידני רבתי, ניו סאות' ויילס.
+> מצאו אפשרויות תיקון מסך, סוללה, יציאת טעינה, זכוכית אחורית, מצלמה
+> ונזקי מים לפי פרבר, כולל מרחק מהחנות, שעות פתיחה ופרטי קשר.
 
-Phone Repair Near Me helps people in any Sydney suburb find the closest listed phone repair store, see indicative pricing and get directions or a phone number. The directory is independent of any phone manufacturer. Every suburb and region has its own page at the site root, e.g. https://phonerepairnearme.com.au/bondi-beach/ — there is no /sydney/ or /services/ path prefix.
+Phone Repair Near Me עוזר לאנשים בכל פרבר בסידני למצוא את חנות תיקון
+הטלפונים הקרובה ביותר ברשימה, לראות מחירים משוערים ולקבל הוראות הגעה
+או מספר טלפון. המדריך עצמאי ואינו קשור ליצרן טלפונים כלשהו.
 
-## Regions (594 suburbs across 17 regions — each region page lists every suburb in it)
+## מבנה כתובות URL
+
+לכל פרבר ואזור יש עמוד משלו בשורש האתר:
+
+- עמוד פרבר: `https://phonerepairnearme.com.au/{suburb}/`
+  (למשל https://phonerepairnearme.com.au/bondi-beach/)
+- עמוד אזור: `https://phonerepairnearme.com.au/{region}/`
+
+אין קידומת נתיב `/sydney/` או `/services/`. עמודי אזור מפרטים כל פרבר
+באזור.
+
+## אזורים
+
+594 פרברים ב-17 אזורים בסידני רבתי:
+
 - [Sydney CBD & Inner City](https://phonerepairnearme.com.au/sydney-cbd-inner-city/)
 - [Eastern Suburbs](https://phonerepairnearme.com.au/eastern-suburbs/)
 - [Inner West](https://phonerepairnearme.com.au/inner-west/)
@@ -23,21 +41,30 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 - [Liverpool & Fairfield](https://phonerepairnearme.com.au/liverpool-fairfield/)
 - [Macarthur](https://phonerepairnearme.com.au/macarthur/)
 
-## Repair services
-- [Screen repair](https://phonerepairnearme.com.au/screen-repair/)
-- [Battery replacement](https://phonerepairnearme.com.au/battery-replacement/)
-- [Charging port](https://phonerepairnearme.com.au/charging-port-repair/)
-- [Back glass](https://phonerepairnearme.com.au/back-glass-replacement/)
-- [Camera](https://phonerepairnearme.com.au/camera-repair/)
-- [Water damage](https://phonerepairnearme.com.au/water-damage-repair/)
+## שירותי תיקון
 
-## Other pages
-- [Home](https://phonerepairnearme.com.au/): overview and suburb search
-- [About](https://phonerepairnearme.com.au/about/)
-- [List your shop](https://phonerepairnearme.com.au/list-your-shop/): for repair businesses that want to be listed
-- [Full sitemap](https://phonerepairnearme.com.au/sitemap.xml): every suburb, region and service URL
+- [תיקון מסך](https://phonerepairnearme.com.au/screen-repair/)
+- [החלפת סוללה](https://phonerepairnearme.com.au/battery-replacement/)
+- [תיקון יציאת טעינה](https://phonerepairnearme.com.au/charging-port-repair/)
+- [החלפת זכוכית אחורית](https://phonerepairnearme.com.au/back-glass-replacement/)
+- [תיקון מצלמה](https://phonerepairnearme.com.au/camera-repair/)
+- [תיקון נזקי מים](https://phonerepairnearme.com.au/water-damage-repair/)
 
-## Notes
-- Each suburb page ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
-- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-10-31, so distances on far suburb pages can be large — this is disclosed on the page itself.
-- Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.
+## עמודים נוספים
+
+- [דף הבית](https://phonerepairnearme.com.au/): סקירה וחיפוש לפי פרבר
+- [אודות](https://phonerepairnearme.com.au/about/)
+- [פרסמו את החנות שלכם](https://phonerepairnearme.com.au/list-your-shop/): לעסקי תיקון שרוצים להופיע ברשימה
+- [מפת אתר מלאה](https://phonerepairnearme.com.au/sitemap.xml): כל כתובות ה-URL של פרברים, אזורים ושירותים
+
+## איך העמודים עובדים
+
+- כל עמוד פרבר מדרג את החנויות הנמצאות כרגע ברשימה לפי מרחק אווירי ישר
+  מאותו פרבר, ומציג שעות פתיחה מחושבות בזמן אמת.
+- פרטי החנויות (שם, כתובת, טלפון, שעות) מתוחזקים ישירות על ידי מפעיל
+  האתר.
+- **הערת כיסוי:** נכון ל-31 באוקטובר 2026 רשומות רק שלוש חנויות פיזיות,
+  לכן המרחקים בעמודי פרברים מרוחקים יכולים להיות גדולים. מגבלה זו מוצגת
+  בעמודים עצמם.
+- הטקסט בעמודי פרברים ואזורים נוצר מתבנית על בסיס מערך נתונים משותף;
+  פרטי החנויות והמחירים אינם כאלה.
