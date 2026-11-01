@@ -340,6 +340,7 @@ def build_suburb_page(suburb):
         ],
     }
 
+    DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     shops_ld = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -351,6 +352,13 @@ def build_suburb_page(suburb):
                     "address": sh['address'], "telephone": sh['phone'],
                     "url": sh['url'],
                     "geo": {"@type": "GeoCoordinates", "latitude": sh['ll'][0], "longitude": sh['ll'][1]},
+                    "priceRange": "$$",
+                    "sameAs": [sh['maps']],
+                    **({"openingHoursSpecification": [
+                        {"@type": "OpeningHoursSpecification", "dayOfWeek": DAY_NAMES[d],
+                         "opens": f"{h[0]:02d}:00", "closes": f"{h[1]:02d}:00"}
+                        for d, h in enumerate(sh['hours'])
+                    ]} if sh['hours'] else {}),
                 },
             }
             for i, (d, sh) in enumerate(ranked)
