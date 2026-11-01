@@ -59,6 +59,19 @@ def haversine(a, b):
     return 2 * R * math.asin(math.sqrt(x))
 
 
+# Drop suburbs more than 20km from every listed store — distant pages add
+# no value once no store is realistically "nearby".
+MAX_SUBURB_KM = 20
+
+
+def _suburb_ll(s):
+    return D.SUBURB_LL.get(s['name']) or D.PC.get(int(s['postcode'])) or D.PC[2000]
+
+
+D.SUBURBS = [s for s in D.SUBURBS if min(haversine(_suburb_ll(s), sh['ll']) for sh in D.SHOPS) <= MAX_SUBURB_KM]
+D.REGIONS = [r for r in D.REGIONS if any(s['region'] == r for s in D.SUBURBS)]
+
+
 # ---- derive slugs for FLAT root-level URLs (no /sydney/, no /services/) ----
 # Suburbs claim the plain slug first (that's what people actually search for);
 # regions/services fall back to a suffixed slug on collision (e.g. the

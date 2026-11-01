@@ -4,7 +4,7 @@
 
 Phone Repair Near Me helps people in any Sydney suburb find the closest listed phone repair store, see indicative pricing and get directions or a phone number. The directory is independent of any phone manufacturer. Every suburb and region has its own page at the site root, e.g. https://phonerepairnearme.com.au/bondi-beach/ — there is no /sydney/ or /services/ path prefix.
 
-## Regions (594 suburbs across 17 regions — each region page lists every suburb in it)
+## Regions (480 suburbs across 16 regions — each region page lists every suburb in it)
 - [Sydney CBD & Inner City](https://phonerepairnearme.com.au/sydney-cbd-inner-city/)
 - [Eastern Suburbs](https://phonerepairnearme.com.au/eastern-suburbs/)
 - [Inner West](https://phonerepairnearme.com.au/inner-west/)
@@ -15,8 +15,7 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 - [Hills District](https://phonerepairnearme.com.au/hills-district/)
 - [Parramatta & Auburn](https://phonerepairnearme.com.au/parramatta-auburn/)
 - [Blacktown & Mount Druitt](https://phonerepairnearme.com.au/blacktown-mount-druitt/)
-- [Penrith](https://phonerepairnearme.com.au/penrith-region/)
-- [Hawkesbury](https://phonerepairnearme.com.au/hawkesbury/)
+- [Penrith](https://phonerepairnearme.com.au/penrith/)
 - [Canterbury-Bankstown](https://phonerepairnearme.com.au/canterbury-bankstown/)
 - [St George](https://phonerepairnearme.com.au/st-george/)
 - [Sutherland Shire](https://phonerepairnearme.com.au/sutherland-shire/)
