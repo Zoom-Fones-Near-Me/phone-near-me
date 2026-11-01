@@ -1,5 +1,79 @@
 # Phone Repair Near Me
 
+> Independent directory of phone repair shops across Greater Sydney, NSW.
+> Find nearby screen, battery, charging port, back glass, camera and
+> water-damage repair options by suburb, with store distance, opening hours
+> and contact details.
+
+Phone Repair Near Me helps people in any Sydney suburb find the closest
+listed phone repair store, see indicative pricing, and get directions or a
+phone number. The directory is independent of any phone manufacturer.
+
+## URL structure
+
+Every suburb and region has its own page at the site root:
+
+- Suburb page: `https://phonerepairnearme.com.au/{suburb}/`
+  (e.g. https://phonerepairnearme.com.au/bondi-beach/)
+- Region page: `https://phonerepairnearme.com.au/{region}/`
+
+There is **no** `/sydney/` or `/services/` path prefix. Region pages list
+every suburb in that region.
+
+## Regions
+
+594 suburbs across 17 regions in Greater Sydney:
+
+- [Sydney CBD & Inner City](https://phonerepairnearme.com.au/sydney-cbd-inner-city/)
+- [Eastern Suburbs](https://phonerepairnearme.com.au/eastern-suburbs/)
+- [Inner West](https://phonerepairnearme.com.au/inner-west/)
+- [Lower North Shore](https://phonerepairnearme.com.au/lower-north-shore/)
+- [Upper North Shore](https://phonerepairnearme.com.au/upper-north-shore/)
+- [Ryde & Epping](https://phonerepairnearme.com.au/ryde-epping/)
+- [Northern Beaches](https://phonerepairnearme.com.au/northern-beaches/)
+- [Hills District](https://phonerepairnearme.com.au/hills-district/)
+- [Parramatta & Auburn](https://phonerepairnearme.com.au/parramatta-auburn/)
+- [Blacktown & Mount Druitt](https://phonerepairnearme.com.au/blacktown-mount-druitt/)
+- [Penrith](https://phonerepairnearme.com.au/penrith-region/)
+- [Hawkesbury](https://phonerepairnearme.com.au/hawkesbury/)
+- [Canterbury-Bankstown](https://phonerepairnearme.com.au/canterbury-bankstown/)
+- [St George](https://phonerepairnearme.com.au/st-george/)
+- [Sutherland Shire](https://phonerepairnearme.com.au/sutherland-shire/)
+- [Liverpool & Fairfield](https://phonerepairnearme.com.au/liverpool-fairfield/)
+- [Macarthur](https://phonerepairnearme.com.au/macarthur/)
+
+## Repair services
+
+- [Screen repair](https://phonerepairnearme.com.au/screen-repair/)
+- [Battery replacement](https://phonerepairnearme.com.au/battery-replacement/)
+- [Charging port repair](https://phonerepairnearme.com.au/charging-port-repair/)
+- [Back glass replacement](https://phonerepairnearme.com.au/back-glass-replacement/)
+- [Camera repair](https://phonerepairnearme.com.au/camera-repair/)
+- [Water damage repair](https://phonerepairnearme.com.au/water-damage-repair/)
+
+## Other pages
+
+- [Home](https://phonerepairnearme.com.au/): overview and suburb search
+- [About](https://phonerepairnearme.com.au/about/)
+- [List your shop](https://phonerepairnearme.com.au/list-your-shop/): for repair businesses that want to be listed
+- [Full sitemap](https://phonerepairnearme.com.au/sitemap.xml): every suburb, region and service URL
+
+## How pages work
+
+- Each suburb page ranks currently listed stores by straight-line distance
+  from that suburb and shows live-computed opening hours.
+- Store listings (name, address, phone, hours) are maintained directly by the
+  site operator.
+- **Coverage note:** only three physical stores are listed as of 2026-10-31,
+  so distances on far suburb pages can be large. This limitation is disclosed
+  on the pages themselves.
+- Suburb and region page copy is template-generated from a shared dataset;
+  store details and pricing are not.
+
+---
+
+# Phone Repair Near Me — גרסה עברית
+
 > מדריך עצמאי של חנויות לתיקון טלפונים בכל רחבי סידני רבתי, ניו סאות' ויילס.
 > מצאו אפשרויות תיקון מסך, סוללה, יציאת טעינה, זכוכית אחורית, מצלמה
 > ונזקי מים לפי פרבר, כולל מרחק מהחנות, שעות פתיחה ופרטי קשר.
