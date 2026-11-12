@@ -22,13 +22,18 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 - [Liverpool & Fairfield](https://phonerepairnearme.com.au/liverpool-fairfield/)
 - [Macarthur](https://phonerepairnearme.com.au/macarthur/)
 
+## Listed stores
+- [ZoomFones Leppington](https://zoom-fones.com.au/leppington): 108 Ingleburn Road, Leppington NSW 2179. Phone 0490 803 024. Hours: Mon–Fri 9am–8pm · Sat 9am–6pm · Sun 9am–5pm.
+- [ZoomFones Melrose Park](https://zoom-fones.com.au/melrose-park): 33 Hope Street, Melrose Park NSW 2114. Phone 0494 527 820. Hours: Mon–Wed 9am–6pm · Thu 9am–9pm · Fri–Sat 9am–8pm · Sun 10am–8pm.
+- [ZoomFones Drummoyne](https://zoom-fones.com.au/drummoyne): Birkenhead Point Brand Outlet, 19 Roseby Street, Drummoyne NSW 2047. Hours: Opening 15 November 2026.
+
 ## Repair services
-- [Screen repair](https://phonerepairnearme.com.au/screen-repair/)
-- [Battery replacement](https://phonerepairnearme.com.au/battery-replacement/)
-- [Charging port](https://phonerepairnearme.com.au/charging-port-repair/)
-- [Back glass](https://phonerepairnearme.com.au/back-glass-replacement/)
-- [Camera](https://phonerepairnearme.com.au/camera-repair/)
-- [Water damage](https://phonerepairnearme.com.au/water-damage-repair/)
+- [Phone screen repair](https://phonerepairnearme.com.au/screen-repair/): Cracked glass, dead pixels or unresponsive touch. Most done in under an hour. From $89.
+- [Phone battery replacement](https://phonerepairnearme.com.au/battery-replacement/): Get your all-day battery back. Usually 30 minutes. From $69.
+- [Phone charging port repair](https://phonerepairnearme.com.au/charging-port-repair/): Loose cable, slow charge or nothing at all — cleaned or replaced. From $79.
+- [Phone back glass replacement](https://phonerepairnearme.com.au/back-glass-replacement/): Shattered rear glass replaced and resealed. From $99.
+- [Phone camera repair](https://phonerepairnearme.com.au/camera-repair/): Blurry, cracked lens or black viewfinder fixed. From $89.
+- [Phone water damage repair](https://phonerepairnearme.com.au/water-damage-repair/): Dropped in the pool? Bring it in fast — the sooner, the better. Free diagnosis.
 
 ## Other pages
 - [Home](https://phonerepairnearme.com.au/): overview and suburb search
@@ -38,5 +43,5 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 
 ## Notes
 - Each suburb page ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
-- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-11-01, so distances on far suburb pages can be large — this is disclosed on the page itself.
+- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-11-13, so distances on far suburb pages can be large — this is disclosed on the page itself.
 - Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.

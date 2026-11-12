@@ -160,7 +160,11 @@ def head(title, description, canonical_path, extra_jsonld=None, extra_head="", g
 <meta property="og:description" content="{esc(description)}">
 <meta property="og:url" content="{canonical}">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+<meta property="og:locale" content="en_AU">
+<meta property="og:image" content="{D.DOMAIN}/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 {geo_tags}<link rel="stylesheet" href="/assets/style.css">
 {extra_head}{jsonld}</head>
 <body>
@@ -214,10 +218,8 @@ def breadcrumb(items):
             parts.append(f'<a href="{href}">{esc(label)}</a>')
         else:
             parts.append(f'<span aria-current="page">{esc(label)}</span>')
-        ld_items.append({
-            "@type": "ListItem", "position": i + 1, "name": label,
-            "item": D.DOMAIN + href if href else None,
-        })
+        ld_items.append({"@type": "ListItem", "position": i + 1, "name": label,
+                         **({"item": D.DOMAIN + href} if href else {})})
     html = '<nav class="breadcrumb" aria-label="Breadcrumb">' + '<span class="sep">&rsaquo;</span>'.join(parts) + '</nav>'
     jsonld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": ld_items}
     return html, jsonld
@@ -252,14 +254,14 @@ def ranked_shops(suburb):
 
 
 def shop_card_html(shop, dist, rank, suburb_name):
-    badge = '<span class="badge-nearest">Nearest</span>' if rank == 1 else ''
+    badge = '<span class="badge-nearest">Nearest</span>' if rank == 1 and dist is not None else ''
     if shop['hours']:
         hours_js = json.dumps(shop['hours'])
         opens_attr = ''
     else:
         hours_js = 'null'
         opens_attr = f' data-opens="{shop["opens"]}"'
-    dist_label = f"In {esc(suburb_name)}" if dist < 1 else f"&asymp; {dist:.1f} km away"
+    dist_label = "" if dist is None else f"In {esc(suburb_name)}" if dist < 1 else f"&asymp; {dist:.1f} km away"
     if shop['phone']:
         call_html = f'<a class="btn-primary" href="tel:{shop["phone"].replace(" ", "")}">Call {esc(shop["phone"])}</a>'
     else:
@@ -284,6 +286,44 @@ def shop_card_html(shop, dist, rank, suburb_name):
     </div>
   </div>
 </article>"""
+
+
+DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+
+def shops_ld(shops):
+    """ItemList of LocalBusiness for the given shops, in order."""
+    items = []
+    for i, sh in enumerate(shops):
+        street, locality, postcode = re.match(r"(.*), (.+) NSW (\d{4})$", sh['address']).groups()
+        biz = {
+            "@type": "LocalBusiness", "name": sh['name'],
+            "address": {"@type": "PostalAddress", "streetAddress": street, "addressLocality": locality,
+                        "addressRegion": "NSW", "postalCode": postcode, "addressCountry": "AU"},
+            "url": sh['url'],
+            "geo": {"@type": "GeoCoordinates", "latitude": sh['ll'][0], "longitude": sh['ll'][1]},
+            "priceRange": "$$",
+            "sameAs": [sh['maps']],
+        }
+        if sh['phone']:
+            biz["telephone"] = "+61" + sh['phone'].replace(" ", "")[1:]
+        if sh['hours']:
+            biz["openingHoursSpecification"] = [
+                {"@type": "OpeningHoursSpecification", "dayOfWeek": DAY_NAMES[d],
+                 "opens": f"{h[0]:02d}:00", "closes": f"{h[1]:02d}:00"}
+                for d, h in enumerate(sh['hours'])
+            ]
+        items.append({"@type": "ListItem", "position": i + 1, "item": biz})
+    return {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": items}
+
+
+def stores_section(heading):
+    cards = "\n".join(shop_card_html(sh, None, i + 1, "") for i, sh in enumerate(D.SHOPS))
+    return f"""<section class="wrap narrow stores">
+  <h2>{esc(heading)}</h2>
+  <div class="shop-list">{cards}</div>
+</section>
+"""
 
 
 INTRO_VARIANTS = [
@@ -353,32 +393,9 @@ def build_suburb_page(suburb):
         ],
     }
 
-    DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    shops_ld = {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "itemListElement": [
-            {
-                "@type": "ListItem", "position": i + 1,
-                "item": {
-                    "@type": "LocalBusiness", "name": sh['name'],
-                    "address": sh['address'], "telephone": sh['phone'],
-                    "url": sh['url'],
-                    "geo": {"@type": "GeoCoordinates", "latitude": sh['ll'][0], "longitude": sh['ll'][1]},
-                    "priceRange": "$$",
-                    "sameAs": [sh['maps']],
-                    **({"openingHoursSpecification": [
-                        {"@type": "OpeningHoursSpecification", "dayOfWeek": DAY_NAMES[d],
-                         "opens": f"{h[0]:02d}:00", "closes": f"{h[1]:02d}:00"}
-                        for d, h in enumerate(sh['hours'])
-                    ]} if sh['hours'] else {}),
-                },
-            }
-            for i, (d, sh) in enumerate(ranked)
-        ],
-    }
+    shops_schema = shops_ld([sh for d, sh in ranked])
 
-    title = f"Phone Repair in {suburb['name']} — Compare Local Repairers | Phone Repair Near Me"
+    title = f"Phone Repair Near Me in {suburb['name']}, NSW {suburb['postcode']}"
     desc = f"Find phone screen, battery and charging repair near {suburb['name']} NSW {suburb['postcode']}. Nearest listed store: {nearest_shop['name']}, {nearest_dist:.1f} km away."
 
     map_suburb = esc(json.dumps({"name": suburb['name'], "ll": list(suburb_coord(suburb))}, ensure_ascii=False))
@@ -417,7 +434,7 @@ def build_suburb_page(suburb):
 </section>
 """
     here_ll = suburb_coord(suburb)
-    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld, faq_ld],
+    write(f"{suburb['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_schema, faq_ld],
           extra_head=LEAFLET_CSS, extra_foot=LEAFLET_JS,
           geo=(here_ll[0], here_ll[1], f"{suburb['name']}, NSW")))
 
@@ -430,7 +447,7 @@ def build_region_page(region):
     items = "".join(f'<li><a href="/{s["slug"]}/">{esc(s["name"])} <span class="muted">{esc(s["postcode"])}</span></a></li>' for s in suburbs)
 
     crumb_html, crumb_ld = breadcrumb([("Home", "/"), (region, None)])
-    title = f"Phone Repair in {region} — All Suburbs | Phone Repair Near Me"
+    title = f"Phone Repair {region}, Sydney — All Suburbs"
     desc = f"Compare phone repair shops across every suburb in {region}, Sydney. {len(suburbs)} suburbs covered, ranked by distance to the nearest listed store."
 
     main_html = f"""
@@ -444,8 +461,8 @@ def build_region_page(region):
   <ul class="suburb-grid">{items}</ul>
   <p><a href="/suburbs/">&larr; All regions</a></p>
 </section>
-"""
-    write(f"{slug}/index.html", page(title, desc, path, main_html, [crumb_ld]))
+{stores_section(f"Repair stores serving {region}")}"""
+    write(f"{slug}/index.html", page(title, desc, path, main_html, [crumb_ld, shops_ld(D.SHOPS)]))
 
 
 def build_service_page(svc):
@@ -454,28 +471,31 @@ def build_service_page(svc):
     region_links = "".join(f'<a href="/{REGION_SLUG[r]}/">{esc(r)}</a>' for r in D.REGIONS)
     crumb_html, crumb_ld = breadcrumb([("Home", "/"), (svc['name'], None)])
     price_label = f"From ${svc['price']}" if svc['price'] else "Free diagnosis"
-    title = f"{svc['name']} — Sydney Wide | Phone Repair Near Me"
+    phrase = "phone " + svc['slug'].replace('-', ' ')  # "phone camera repair" — a bare "Camera" ranks for nothing
+    title = f"{phrase.title()} Sydney | Phone Repair Near Me"
     desc = f"{svc['desc']} {price_label}. Compare listed repairers across Greater Sydney by suburb."
     service_ld = {
         "@context": "https://schema.org", "@type": "Service",
-        "serviceType": svc['name'], "areaServed": "Greater Sydney, NSW",
-        "provider": {"@type": "Organization", "name": D.SITE_NAME},
+        "serviceType": phrase.capitalize(), "areaServed": "Greater Sydney, NSW",
+        "provider": {"@type": "Organization", "name": D.SITE_NAME, "url": D.DOMAIN + "/"},
+        **({"offers": {"@type": "Offer", "priceSpecification": {
+            "@type": "PriceSpecification", "minPrice": svc['price'], "priceCurrency": "AUD"}}} if svc['price'] else {}),
     }
     main_html = f"""
 <div class="wrap narrow">{crumb_html}</div>
 <section class="hero-suburb wrap narrow">
   <p class="eyebrow">{esc(svc['tag'])}</p>
-  <h1>{esc(svc['name'])}.</h1>
+  <h1>{esc(phrase.capitalize())} in Sydney.</h1>
   <p class="lede">{esc(svc['desc'])} {price_label}.</p>
 </section>
 <section class="wrap narrow">
   <h2>Available across Greater Sydney</h2>
-  <p>Find a {esc(svc['name'].lower())} repairer near you by suburb or browse by region:</p>
+  <p>Find {esc(phrase)} near you by suburb or browse by region:</p>
   <div class="link-grid">{region_links}</div>
   <p><a href="/suburbs/">Browse all suburbs &rsaquo;</a></p>
 </section>
-"""
-    write(f"{svc['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, service_ld]))
+{stores_section(f"Where to get {phrase} in Sydney")}"""
+    write(f"{svc['slug']}/index.html", page(title, desc, path, main_html, [crumb_ld, service_ld, shops_ld(D.SHOPS)]))
 
 
 def build_home():
@@ -500,7 +520,9 @@ def build_home():
 </details>""" for f in D.FAQS)
     brand_html = "".join(f"<span>{esc(b)}</span>" for b in D.BRANDS)
 
-    website_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": D.SITE_NAME, "url": D.DOMAIN}
+    website_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": D.SITE_NAME, "url": D.DOMAIN + "/",
+                  "publisher": {"@type": "Organization", "name": D.SITE_NAME, "url": D.DOMAIN + "/",
+                                "logo": D.DOMAIN + "/assets/og-image.png", "areaServed": "Greater Sydney, NSW"}}
     faq_ld = {
         "@context": "https://schema.org", "@type": "FAQPage",
         "mainEntity": [
@@ -510,7 +532,7 @@ def build_home():
     }
 
     title = "Phone Repair Near Me — Sydney | Screen, Battery & More"
-    desc = "Find trusted phone repair near you in every Sydney suburb. Compare local repairers for iPhone, Samsung and Google Pixel screen, battery and charging port repairs."
+    desc = "Find trusted phone repair near you in every Sydney suburb. Compare local repairers for iPhone, Samsung and Pixel screen, battery and charging port repairs."
 
     main_html = f"""
 <section class="hero wrap">
@@ -533,6 +555,7 @@ def build_home():
   </div>
 </section>
 
+{stores_section("Listed phone repair stores in Sydney.")}
 <section class="band-dark">
   <div class="wrap">
     <h2 data-reveal="1">Three steps.<br><span class="muted">Zero guesswork.</span></h2>
@@ -559,14 +582,14 @@ def build_home():
   {faq_html}
 </section>
 """
-    write("index.html", page(title, desc, path, main_html, [website_ld, faq_ld]))
+    write("index.html", page(title, desc, path, main_html, [website_ld, shops_ld(D.SHOPS), faq_ld]))
 
 
 def build_repairs_index():
     path = "/repairs/"
     register(path)
     crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Repairs", None)])
-    title = "Phone Repair Services — Screen, Battery & More | Phone Repair Near Me"
+    title = "Phone Repair Services Sydney | Phone Repair Near Me"
     desc = "Browse every phone repair service covered by listed Sydney repairers: screen, battery, charging port, back glass, camera and water damage."
     service_cards = ""
     for s in D.SERVICES:
@@ -595,7 +618,7 @@ def build_suburbs_index():
     path = "/suburbs/"
     register(path)
     crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Suburbs", None)])
-    title = "Find Phone Repair by Suburb — Greater Sydney | Phone Repair Near Me"
+    title = "Phone Repair by Suburb — Sydney | Phone Repair Near Me"
     desc = f"Search phone repair by suburb or browse all {len(D.REGIONS)} regions of Greater Sydney, covering {len(D.SUBURBS)} suburbs."
     region_cards = "".join(
         f'<a class="region-card" href="/{REGION_SLUG[r]}/"><h3>{esc(r)}</h3><span class="muted">{len([s for s in D.SUBURBS if s["region"] == r])} suburbs</span></a>'
@@ -645,7 +668,7 @@ def build_list_your_shop():
     path = "/list-your-shop/"
     register(path)
     crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("List your shop", None)])
-    title = "List Your Repair Shop — Get Found by Local Customers | Phone Repair Near Me"
+    title = "List Your Repair Shop | Phone Repair Near Me"
     desc = "List your phone repair shop on Phone Repair Near Me and get found by customers searching by suburb across Greater Sydney. Free to list, no obligation."
 
     main_html = f"""
@@ -742,7 +765,9 @@ def build_404():
   <p>That page doesn't exist. Try the <a href="/suburbs/">suburb directory</a> or go back <a href="/">home</a>.</p>
 </section>
 """
-    write("404.html", page("Page not found — Phone Repair Near Me", "Page not found.", "/404.html", main_html))
+    html = page("Page not found — Phone Repair Near Me", "Page not found.", "/404.html", main_html)
+    html = html.replace(f'<link rel="canonical" href="{D.DOMAIN}/404.html">', '<meta name="robots" content="noindex">')
+    write("404.html", html)
 
 
 # ---------------------------------------------------------------------------
@@ -755,6 +780,7 @@ def build_assets():
     write("assets/favicon.svg", FAVICON_SVG)
     write("assets/hero-repair.svg", HERO_SVG)
     write("assets/list-your-shop-hero.svg", LIST_SHOP_HERO_SVG)
+    shutil.copy(os.path.join(ROOT, "tools", "og-image.png"), os.path.join(ROOT, "assets", "og-image.png"))
     suburb_index = [{"n": s['name'], "s": s['slug'], "r": s['region'], "p": s['postcode']} for s in D.SUBURBS]
     write("assets/suburbs.json", json.dumps(suburb_index, ensure_ascii=False))
 
@@ -825,6 +851,7 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .suburb-shops{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;padding-bottom:clamp(64px,9vw,100px)}
 @media(max-width:733px){.suburb-shops{grid-template-columns:minmax(0,1fr)}.map-aside{display:none}}
 .shop-list{display:flex;flex-direction:column;gap:14px}
+.stores{padding-bottom:clamp(48px,7vw,80px)}.stores>h2{margin-bottom:20px}
 .map-aside{width:100%;position:sticky;top:72px;border-radius:24px;overflow:hidden;aspect-ratio:3/4;background:var(--bg-light)}
 .leaflet-map{width:100%;height:100%}
 .shop-card{background:var(--bg-light);border-radius:20px;padding:22px}
@@ -1114,7 +1141,12 @@ def build_sitemap():
 
 def build_llms_txt():
     region_links = "\n".join(f"- [{r}]({D.DOMAIN}/{REGION_SLUG[r]}/)" for r in D.REGIONS)
-    service_links = "\n".join(f"- [{s['name']}]({D.DOMAIN}/{s['slug']}/)" for s in D.SERVICES)
+    service_links = "\n".join(
+        f"- [Phone {s['slug'].replace('-', ' ')}]({D.DOMAIN}/{s['slug']}/): {s['desc']} "
+        + (f"From ${s['price']}." if s['price'] else "Free diagnosis.") for s in D.SERVICES)
+    store_lines = "\n".join(
+        f"- [{sh['name']}]({sh['url']}): {sh['address']}. " + (f"Phone {sh['phone']}. " if sh['phone'] else "")
+        + f"Hours: {sh['hoursText']}." for sh in D.SHOPS)
     write("llms.txt", f"""# {D.SITE_NAME}
 
 > Independent directory of phone repair shops across Greater Sydney, NSW. Compare screen, battery, charging port, back glass, camera and water-damage repair options by suburb, with store distance, hours and contact details.
@@ -1123,6 +1155,9 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 
 ## Regions ({len(D.SUBURBS)} suburbs across {len(D.REGIONS)} regions — each region page lists every suburb in it)
 {region_links}
+
+## Listed stores
+{store_lines}
 
 ## Repair services
 {service_links}
