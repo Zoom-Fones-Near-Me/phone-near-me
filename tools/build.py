@@ -18,6 +18,7 @@ import data as D
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TODAY = date.today().isoformat()
+INDEXNOW_KEY = 'acbd9507b0a8d393d9300fb4c5c60938'  # public by design: served at /<key>.txt to prove site ownership
 
 # Everything at repo root is generated output EXCEPT these — a flat URL
 # structure means suburb/region/service folders (600+ of them) live at the
@@ -1197,8 +1198,20 @@ def main():
     build_llms_txt()
     write("CNAME", "phonerepairnearme.com.au\n")
     write(".nojekyll", "")
+    write(f"{INDEXNOW_KEY}.txt", INDEXNOW_KEY)
     print(f"Built {len(ALL_URLS)} pages.")
 
 
+def indexnow():
+    """Submit every sitemap URL to IndexNow (Bing, Yandex, etc). Run after the deploy is live."""
+    import urllib.request
+    host = D.DOMAIN.split("//")[1]
+    urls = re.findall(r"<loc>(.*?)</loc>", open(os.path.join(ROOT, "sitemap.xml"), encoding="utf-8").read())
+    body = json.dumps({"host": host, "key": INDEXNOW_KEY, "keyLocation": f"{D.DOMAIN}/{INDEXNOW_KEY}.txt", "urlList": urls})
+    req = urllib.request.Request("https://api.indexnow.org/indexnow", body.encode(),
+                                 {"Content-Type": "application/json; charset=utf-8"})
+    print(f"IndexNow: {len(urls)} URLs -> HTTP {urllib.request.urlopen(req).status}")
+
+
 if __name__ == "__main__":
-    main()
+    indexnow() if '--indexnow' in sys.argv else main()
