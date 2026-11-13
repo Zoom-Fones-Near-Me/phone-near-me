@@ -85,7 +85,7 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .btn-dark:hover{text-decoration:none;background:#000}
 .btn-outline{border:1px solid var(--accent);color:var(--accent);font-size:14px;font-weight:500;padding:8px 17px;border-radius:980px}
 .btn-outline:hover{text-decoration:none}
-.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:40px;padding:56px 0}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:40px}
 .price-list{list-style:none;margin:0;padding:0}
 .price-list li{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)}
 .chip-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
@@ -122,3 +122,9 @@ h1,h2,h3{letter-spacing:-0.03em;line-height:1.1;margin:0}
 .form-actions button{border:0;cursor:pointer}
 .form-success{text-align:center;padding:40px 20px}
 .form-success button{border:0;cursor:pointer}
+.band-light+section.wrap,.stores{padding-top:56px}
+main>section:last-child:not([class*=band]){padding-bottom:64px}
+.faqs h2{margin-bottom:20px}
+.band-light+.stores{max-width:1024px}
+@media(max-width:480px){.shop-buttons{width:100%}.shop-buttons a{flex:1 1 auto;text-align:center}}
+.hero-suburb .lede,.hero-suburb .search-form{margin-left:0}
