@@ -62,10 +62,10 @@ SHOPS = [
    'maps': 'https://www.google.com/maps/place/?q=place_id%3AChIJm-fdEgKlEmsRKMCC6tPkJ90',
    'hoursText': 'Mon–Wed 9am–6pm · Thu 9am–9pm · Fri–Sat 9am–8pm · Sun 10am–8pm',
    'hours': [[10, 20], [9, 18], [9, 18], [9, 18], [9, 21], [9, 20], [9, 20]], 'opens': None},
-  {'name': 'ZoomFones Drummoyne', 'address': 'Birkenhead Point Brand Outlet, 19 Roseby Street, Drummoyne NSW 2047', 'note': 'Opening 15 November 2026',
-   'phone': None, 'll': [-33.856, 151.164], 'url': 'https://zoom-fones.com.au/drummoyne',
-   'maps': 'https://www.google.com/maps/search/?api=1&query=Birkenhead+Point+Brand+Outlet+Drummoyne',
-   'hoursText': 'Opening 15 November 2026', 'hours': None, 'opens': '2026-11-15T09:00:00+11:00'},
+  {'name': 'ZoomFones Drummoyne', 'address': 'Kiosk 12, Birkenhead Point Outlet Centre, 19 Roseby Street, Drummoyne NSW 2047', 'note': 'Food court level, next to ALDI',
+   'phone': '0494 525 095', 'll': [-33.856, 151.164], 'url': 'https://zoom-fones.com.au/drummoyne',
+   'maps': 'https://www.google.com/maps/search/?api=1&query=Birkenhead+Point+Outlet+Centre+19+Roseby+Street+Drummoyne',
+   'hoursText': 'Now open · call for hours', 'hours': None, 'opens': '2026-11-15T09:00:00+11:00'},
 ]
 
 FAQS = [

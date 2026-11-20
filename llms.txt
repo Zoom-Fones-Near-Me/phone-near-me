@@ -25,7 +25,7 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 ## Listed stores
 - [ZoomFones Leppington](https://zoom-fones.com.au/leppington): 108 Ingleburn Road, Leppington NSW 2179. Phone 0490 803 024. Hours: Mon–Fri 9am–8pm · Sat 9am–6pm · Sun 9am–5pm.
 - [ZoomFones Melrose Park](https://zoom-fones.com.au/melrose-park): 33 Hope Street, Melrose Park NSW 2114. Phone 0494 527 820. Hours: Mon–Wed 9am–6pm · Thu 9am–9pm · Fri–Sat 9am–8pm · Sun 10am–8pm.
-- [ZoomFones Drummoyne](https://zoom-fones.com.au/drummoyne): Birkenhead Point Brand Outlet, 19 Roseby Street, Drummoyne NSW 2047. Hours: Opening 15 November 2026.
+- [ZoomFones Drummoyne](https://zoom-fones.com.au/drummoyne): Kiosk 12, Birkenhead Point Outlet Centre, 19 Roseby Street, Drummoyne NSW 2047. Phone 0494 525 095. Hours: Now open · call for hours.
 
 ## Repair services
 - [Phone screen repair](https://phonerepairnearme.com.au/screen-repair/): Cracked glass, dead pixels or unresponsive touch. Most done in under an hour. From $89.
@@ -43,5 +43,5 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 
 ## Notes
 - Each suburb page ranks the currently listed stores by straight-line distance from that suburb and shows live-computed opening hours.
-- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-11-14, so distances on far suburb pages can be large — this is disclosed on the page itself.
+- Store listings (name, address, phone, hours) are maintained directly by the site operator; only three physical stores are listed as of 2026-11-21, so distances on far suburb pages can be large — this is disclosed on the page itself.
 - Suburb/region page copy is template-generated from a shared dataset; store details and pricing are not.

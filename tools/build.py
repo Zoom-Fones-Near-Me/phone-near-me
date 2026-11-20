@@ -936,7 +936,7 @@ MAIN_JS = """
     if (!hours) {
       var opens = el.getAttribute('data-opens');
       if (opens && new Date() < new Date(opens)) { el.textContent = 'Coming soon \\u00b7 ' + staticText; return; }
-      el.textContent = 'Open now'; el.style.color = '#1d8a3a'; return;
+      el.style.color = '#1d8a3a'; return;
     }
     var now = sydneyNow(), d = now.getDay(), t = now.getHours() + now.getMinutes() / 60;
     var slot = hours[d], open = t >= slot[0] && t < slot[1];
