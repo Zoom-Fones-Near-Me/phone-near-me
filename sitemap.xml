@@ -90,7 +90,7 @@
   <url><loc>https://phonerepairnearme.com.au/russell-lea/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/wareemba/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/canada-bay/</loc><lastmod>2026-11-21</lastmod></url>
-  <url><loc>https://phonerepairnearme.com.au/drummoyne/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://phonerepairnearme.com.au/drummoyne/</loc><lastmod>2026-11-21</lastmod><priority>1.0</priority></url>
   <url><loc>https://phonerepairnearme.com.au/stanmore/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/petersham/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/lewisham/</loc><lastmod>2026-11-21</lastmod></url>
@@ -509,4 +509,6 @@
   <url><loc>https://phonerepairnearme.com.au/list-your-shop/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/about/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://phonerepairnearme.com.au/privacy/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://phonerepairnearme.com.au/blog/phone-charging-but-percentage-not-going-up/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://phonerepairnearme.com.au/blog/</loc><lastmod>2026-11-21</lastmod></url>
 </urlset>

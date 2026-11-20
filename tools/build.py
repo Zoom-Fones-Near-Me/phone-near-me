@@ -79,7 +79,7 @@ D.REGIONS = [r for r in D.REGIONS if any(s['region'] == r for s in D.SUBURBS)]
 # "Penrith" region vs. the "Penrith" suburb both slugify to "penrith").
 RESERVED_SLUGS = {'about', 'contact', 'privacy', 'list-your-shop', 'assets',
                    'tools', 'legacy-artifact', 'sitemap', 'robots', 'llms', '404',
-                   'repairs', 'suburbs'}
+                   'repairs', 'suburbs', 'blog'}
 _used = set(RESERVED_SLUGS)
 
 for s in D.SUBURBS:
@@ -192,7 +192,7 @@ def footer_html():
         ("Repairs", [(s['name'], f"/{s['slug']}/") for s in D.SERVICES]),
         ("Brands", [(b, "/repairs/") for b in D.BRANDS]),
         ("Regions", [(r, f"/{REGION_SLUG[r]}/") for r in D.REGIONS[:6]]),
-        ("Company", [("About", "/about/"), ("List your shop", "/list-your-shop/"), ("Contact", "/contact/"), ("Privacy", "/privacy/")]),
+        ("Company", [("About", "/about/")] + ([("Blog", "/blog/")] if D.BLOG else []) + [("List your shop", "/list-your-shop/"), ("Contact", "/contact/"), ("Privacy", "/privacy/")]),
     ]
     cols_html = ""
     for title, items in cols:
@@ -759,6 +759,57 @@ def build_privacy():
     write("privacy/index.html", page(title, desc, path, main_html, [crumb_ld]))
 
 
+def build_blog():
+    """Posts: metadata in data.BLOG (newest first), body HTML in tools/posts/<slug>.html."""
+    if not D.BLOG:
+        return  # no empty /blog/ page until the first post exists
+    cards = ""
+    for post in D.BLOG:
+        path = register(f"/blog/{post['slug']}/")
+        pub = date.fromisoformat(post['date'])
+        body = open(os.path.join(ROOT, 'tools', 'posts', post['slug'] + '.html'), encoding='utf-8').read()
+        crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Blog", "/blog/"), (post['title'], None)])
+        article_ld = {"@context": "https://schema.org", "@type": "BlogPosting", "headline": post['title'],
+                      "description": post['desc'], "datePublished": post['date'], "dateModified": post.get('updated', post['date']),
+                      "mainEntityOfPage": D.DOMAIN + path, "image": f"{D.DOMAIN}/assets/og-image.png",
+                      "author": {"@type": "Organization", "name": D.SITE_NAME, "url": D.DOMAIN},
+                      "publisher": {"@type": "Organization", "name": D.SITE_NAME, "url": D.DOMAIN}}
+        main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<article>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">{esc(post['tag'])} &middot; <time datetime="{post['date']}">{pub.day} {pub:%B %Y}</time></p>
+  <h1>{esc(post['title'])}</h1>
+  <p class="lede">{esc(post['desc'])}</p>
+</section>
+<section class="wrap narrow prose">
+{body}
+</section>
+</article>
+{stores_section("Need it fixed? Find a repairer near you.")}
+"""
+        write(f"blog/{post['slug']}/index.html", page(f"{post['title']} | {D.SITE_NAME}", post['desc'], path, main_html, [crumb_ld, article_ld]))
+        cards += f"""<a class="service-card" href="{path}">
+  <span class="eyebrow">{esc(post['tag'])}</span>
+  <h2>{esc(post['title'])}</h2>
+  <p>{esc(post['desc'])}</p>
+</a>"""
+    path = register("/blog/")
+    crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Blog", None)])
+    main_html = f"""
+<div class="wrap narrow">{crumb_html}</div>
+<section class="hero-suburb wrap narrow">
+  <p class="eyebrow">Repair guides</p>
+  <h1>Phone repair blog.</h1>
+  <p class="lede">Plain-English guides to the phone faults Sydney is searching for right now, from people who fix them every day.</p>
+</section>
+<section class="wrap narrow">
+  <div class="service-grid">{cards}</div>
+</section>
+"""
+    write("blog/index.html", page(f"Phone Repair Blog | {D.SITE_NAME}", "Guides to common phone faults: batteries, charging, screens and water damage, written by Sydney repair technicians.", path, main_html, [crumb_ld]))
+
+
 def build_404():
     main_html = """
 <section class="wrap narrow prose" style="text-align:center;padding:80px 22px">
@@ -1142,7 +1193,9 @@ Sitemap: {D.DOMAIN}/sitemap.xml
 
 
 def build_sitemap():
-    urls = "".join(f"  <url><loc>{D.DOMAIN}{p}</loc><lastmod>{TODAY}</lastmod></url>\n" for p in ALL_URLS)
+    top = {'/drummoyne/'}  # flagship store's suburb page; everything else keeps the 0.5 default
+    urls = "".join(f"  <url><loc>{D.DOMAIN}{p}</loc><lastmod>{TODAY}</lastmod>"
+                   + ("<priority>1.0</priority>" if p in top else "") + "</url>\n" for p in ALL_URLS)
     write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
 
 
@@ -1154,6 +1207,7 @@ def build_llms_txt():
     store_lines = "\n".join(
         f"- [{sh['name']}]({sh['url']}): {sh['address']}. " + (f"Phone {sh['phone']}. " if sh['phone'] else "")
         + f"Hours: {sh['hoursText']}." for sh in D.SHOPS)
+    blog_line = f"- [Blog]({D.DOMAIN}/blog/): repair guides on common phone faults\n" if D.BLOG else ""
     write("llms.txt", f"""# {D.SITE_NAME}
 
 > Independent directory of phone repair shops across Greater Sydney, NSW. Compare screen, battery, charging port, back glass, camera and water-damage repair options by suburb, with store distance, hours and contact details.
@@ -1172,7 +1226,7 @@ Phone Repair Near Me helps people in any Sydney suburb find the closest listed p
 ## Other pages
 - [Home]({D.DOMAIN}/): overview and suburb search
 - [About]({D.DOMAIN}/about/)
-- [List your shop]({D.DOMAIN}/list-your-shop/): for repair businesses that want to be listed
+{blog_line}- [List your shop]({D.DOMAIN}/list-your-shop/): for repair businesses that want to be listed
 - [Full sitemap]({D.DOMAIN}/sitemap.xml): every suburb, region and service URL
 
 ## Notes
@@ -1198,6 +1252,7 @@ def main():
     build_list_your_shop()
     build_about()
     build_privacy()
+    build_blog()
     build_404()
     build_robots()
     build_sitemap()

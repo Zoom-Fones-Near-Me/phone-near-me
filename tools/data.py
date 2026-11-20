@@ -52,6 +52,11 @@ PC = {2000:[-33.868,151.207],2007:[-33.879,151.197],2008:[-33.887,151.198],2009:
 SUBURB_LL = {'Melrose Park': [-33.814, 151.0735], 'Leppington': [-33.954, 150.81], 'Drummoyne': [-33.856, 151.164]}
 
 SHOPS = [
+  # Drummoyne is the flagship: listed first wherever stores aren't ranked by distance.
+  {'name': 'ZoomFones Drummoyne', 'address': 'Kiosk 12, Birkenhead Point Outlet Centre, 19 Roseby Street, Drummoyne NSW 2047', 'note': 'Food court level, next to ALDI',
+   'phone': '0494 525 095', 'll': [-33.856, 151.164], 'url': 'https://zoom-fones.com.au/drummoyne',
+   'maps': 'https://www.google.com/maps/search/?api=1&query=Birkenhead+Point+Outlet+Centre+19+Roseby+Street+Drummoyne',
+   'hoursText': 'Now open · call for hours', 'hours': None, 'opens': '2026-11-15T09:00:00+11:00'},
   {'name': 'ZoomFones Leppington', 'address': '108 Ingleburn Road, Leppington NSW 2179', 'note': 'Left of the entrance as you come in from the car park',
    'phone': '0490 803 024', 'll': [-33.954, 150.81], 'url': 'https://zoom-fones.com.au/leppington',
    'maps': 'https://www.google.com/maps/place/?q=place_id%3AChIJh0nZrsntEmsRXzmP_i_94Gw',
@@ -62,10 +67,6 @@ SHOPS = [
    'maps': 'https://www.google.com/maps/place/?q=place_id%3AChIJm-fdEgKlEmsRKMCC6tPkJ90',
    'hoursText': 'Mon–Wed 9am–6pm · Thu 9am–9pm · Fri–Sat 9am–8pm · Sun 10am–8pm',
    'hours': [[10, 20], [9, 18], [9, 18], [9, 18], [9, 21], [9, 20], [9, 20]], 'opens': None},
-  {'name': 'ZoomFones Drummoyne', 'address': 'Kiosk 12, Birkenhead Point Outlet Centre, 19 Roseby Street, Drummoyne NSW 2047', 'note': 'Food court level, next to ALDI',
-   'phone': '0494 525 095', 'll': [-33.856, 151.164], 'url': 'https://zoom-fones.com.au/drummoyne',
-   'maps': 'https://www.google.com/maps/search/?api=1&query=Birkenhead+Point+Outlet+Centre+19+Roseby+Street+Drummoyne',
-   'hoursText': 'Now open · call for hours', 'hours': None, 'opens': '2026-11-15T09:00:00+11:00'},
 ]
 
 FAQS = [
@@ -77,3 +78,11 @@ FAQS = [
 ]
 
 BRANDS = ['iPhone', 'Samsung', 'Google Pixel', 'Oppo', 'Motorola', 'iPad']
+
+# Blog posts, newest first. Body HTML lives in tools/posts/<slug>.html.
+# {'slug': ..., 'title': ..., 'desc': ..., 'tag': 'Battery', 'date': 'YYYY-MM-DD'}
+BLOG = [
+  {'slug': 'phone-charging-but-percentage-not-going-up', 'tag': 'Charging', 'date': '2026-11-21',
+   'title': "Phone Charging but the Percentage Not Going Up? Here's Why",
+   'desc': "Phone plugged in but the battery % won't climb? A technician's step-by-step guide: cable, adapter, charging port or battery, and how long each fix takes."},
+]
