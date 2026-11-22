@@ -768,6 +768,16 @@ def build_blog():
         path = register(f"/blog/{post['slug']}/")
         pub = date.fromisoformat(post['date'])
         body = open(os.path.join(ROOT, 'tools', 'posts', post['slug'] + '.html'), encoding='utf-8').read()
+        mins = max(1, round(len(re.sub(r'<[^>]+>', ' ', body).split()) / 220))  # ~220 wpm
+        faqs = post.get('faq', [])
+        faq_html = "".join(f"""<details class="faq">
+  <summary>{esc(f['q'])}</summary>
+  <p>{esc(f['a'])}</p>
+</details>""" for f in faqs)
+        faq_section = f"""<section class="wrap narrow faqs">
+  <h2>Frequently asked questions</h2>
+  {faq_html}
+</section>""" if faqs else ""
         crumb_html, crumb_ld = breadcrumb([("Home", "/"), ("Blog", "/blog/"), (post['title'], None)])
         article_ld = {"@context": "https://schema.org", "@type": "BlogPosting", "headline": post['title'],
                       "description": post['desc'], "datePublished": post['date'], "dateModified": post.get('updated', post['date']),
@@ -778,17 +788,19 @@ def build_blog():
 <div class="wrap narrow">{crumb_html}</div>
 <article>
 <section class="hero-suburb wrap narrow">
-  <p class="eyebrow">{esc(post['tag'])} &middot; <time datetime="{post['date']}">{pub.day} {pub:%B %Y}</time></p>
+  <p class="eyebrow">{esc(post['tag'])} &middot; <time datetime="{post['date']}">{pub.day} {pub:%B %Y}</time> &middot; {mins} min read</p>
   <h1>{esc(post['title'])}</h1>
   <p class="lede">{esc(post['desc'])}</p>
 </section>
 <section class="wrap narrow prose">
 {body}
 </section>
+{faq_section}
 </article>
 {stores_section("Need it fixed? Find a repairer near you.")}
 """
-        write(f"blog/{post['slug']}/index.html", page(f"{post['title']} | {D.SITE_NAME}", post['desc'], path, main_html, [crumb_ld, article_ld]))
+        write(f"blog/{post['slug']}/index.html", page(f"{post['title']} | {D.SITE_NAME}", post['desc'], path, main_html, [crumb_ld, article_ld] + ([{"@context": "https://schema.org", "@type": "FAQPage",
+            "mainEntity": [{"@type": "Question", "name": f['q'], "acceptedAnswer": {"@type": "Answer", "text": f['a']}} for f in faqs]}] if faqs else [])))
         cards += f"""<a class="service-card" href="{path}">
   <span class="eyebrow">{esc(post['tag'])}</span>
   <h2>{esc(post['title'])}</h2>

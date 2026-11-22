@@ -82,6 +82,30 @@ BRANDS = ['iPhone', 'Samsung', 'Google Pixel', 'Oppo', 'Motorola', 'iPad']
 # Blog posts, newest first. Body HTML lives in tools/posts/<slug>.html.
 # {'slug': ..., 'title': ..., 'desc': ..., 'tag': 'Battery', 'date': 'YYYY-MM-DD'}
 BLOG = [
+  {'slug': 'samsung-green-line-on-screen', 'tag': 'Screen', 'date': '2026-11-22',
+   'title': "Green Line on Your Samsung Screen? What It Means and How It's Fixed",
+   'desc': "A green or pink line on a Galaxy screen means the display panel has failed. Here's why, and why we fit genuine Samsung service screens on the S series.",
+   'faq': [
+     {'q': "Will the green line on my Samsung go away by itself?", 'a': "No. A permanent green line means part of the display panel has failed. It won't fix itself and usually gets worse, so the screen needs replacing."},
+     {'q': "Can a factory reset fix a green line?", 'a': "No. If the line stays in the same place on every screen, including the lock screen, it's a hardware fault in the panel. Resetting the phone only wipes your data."},
+     {'q': "Do you use aftermarket screens on Samsung S series phones?", 'a': "No. For the Galaxy S series we only fit new genuine Samsung service-pack screens. Copy screens don't match the colours and often break the under-display fingerprint reader."},
+     {'q': "Does the genuine Samsung screen come with a frame?", 'a': "Yes. The service pack comes with the display already bonded to a new frame, so it sits flush and the sides of the phone look new too."},
+     {'q': "Will I lose my photos and data?", 'a': "No. A screen replacement doesn't wipe the phone. It's still smart to back up first while the screen works."},
+     {'q': "Will my fingerprint unlock still work after the repair?", 'a': "Yes. With a genuine Samsung service screen, the under-display fingerprint reader works just like it did when the phone was new."},
+     {'q': "How much does a Samsung S series screen replacement cost?", 'a': "It depends on the model, because each Galaxy S phone has its own genuine service screen. Call or visit a listed store with your model for an exact quote."},
+   ]},
+  {'slug': 'iphone-battery-draining-fast-after-update', 'tag': 'Battery', 'date': '2026-11-22',
+   'title': "iPhone Battery Draining Fast After an iOS Update? Check This First",
+   'desc': "Battery dropping faster after updating iOS? Check your battery health: if it's good the drain settles, if it's low a new battery beats a new phone.",
+   'faq': [
+     {'q': "Is it normal for my iPhone battery to drain faster after an iOS update?", 'a': "Yes, for the first few days. The phone re-indexes photos and files and updates apps in the background, which uses extra power. It usually settles by itself."},
+     {'q': "How long does battery drain last after an update?", 'a': "Usually a few days. If your battery health is good and the drain is still bad after a week, it's often an update bug that the next iOS update fixes."},
+     {'q': "Where do I check my iPhone battery health?", 'a': "Go to Settings, then Battery, then Battery Health (or Battery Health & Charging) and look at Maximum Capacity."},
+     {'q': "What battery health percentage means I need a new battery?", 'a': "Around 80% or lower, or a Service message, means the battery is worn and a replacement will make a real difference. Around 85% or higher is still healthy."},
+     {'q': "Should I buy a new iPhone if the battery is bad?", 'a': "Try a new battery first. If the screen and cameras are fine, a battery replacement from $69 often makes the phone feel new again for far less than a new iPhone."},
+     {'q': "How long does an iPhone battery replacement take?", 'a': "Usually about 30 to 45 minutes, so most people wait for it."},
+     {'q': "Will I lose my data when the battery is replaced?", 'a': "No. Your photos, apps and settings stay on the phone. A backup beforehand is still a good habit."},
+   ]},
   {'slug': 'phone-charging-but-percentage-not-going-up', 'tag': 'Charging', 'date': '2026-11-21',
    'title': "Phone Charging but the Percentage Not Going Up? Here's Why",
    'desc': "Phone plugged in but the battery % won't climb? A technician's step-by-step guide: cable, adapter, charging port or battery, and how long each fix takes."},
