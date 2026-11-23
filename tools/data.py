@@ -82,6 +82,17 @@ BRANDS = ['iPhone', 'Samsung', 'Google Pixel', 'Oppo', 'Motorola', 'iPad']
 # Blog posts, newest first. Body HTML lives in tools/posts/<slug>.html.
 # {'slug': ..., 'title': ..., 'desc': ..., 'tag': 'Battery', 'date': 'YYYY-MM-DD'}
 BLOG = [
+  {'slug': 'phone-ghost-touch-screen-pressing-itself', 'tag': 'Screen', 'date': '2026-11-24',
+   'title': "Phone Screen Pressing Itself? Ghost Touch Explained",
+   'desc': "Phone typing its own passcode or tapping by itself? That's ghost touch. Why it happens, why it can lock you out, and how the screen gets fixed.",
+   'faq': [
+     {'q': "What is ghost touch on a phone?", 'a': "Ghost touch is when the touchscreen registers taps nobody is making. The phone types, opens apps or scrolls on its own. It's almost always a fault in the screen's touch layer."},
+     {'q': "Can ghost touch lock my iPhone?", 'a': "Yes. If it keeps entering wrong passcodes, the iPhone shows iPhone Unavailable or Security Lockout. Getting back in then means erasing the phone, so anything without a backup is lost."},
+     {'q': "Can I fix ghost touch at home?", 'a': "Restart the phone once. If it keeps happening, it's hardware. Turn the screen off, stop trying to unlock it and take it to a repairer."},
+     {'q': "What causes ghost touch?", 'a': "Most often a cheap aftermarket replacement screen, a faulty screen, or liquid inside the phone. It happens on every brand, more often on LCD screens but on OLED too."},
+     {'q': "How is ghost touch repaired?", 'a': "Usually by replacing the screen, since the glass, touch layer and display are one bonded panel. In rare cases the fault is on the main board and needs a board repair."},
+     {'q': "Will a screen replacement erase my data?", 'a': "No. Replacing the screen doesn't touch your data. The risk is the phone locking itself first, which is why it's worth getting it seen quickly."},
+   ]},
   {'slug': 'samsung-green-line-on-screen', 'tag': 'Screen', 'date': '2026-11-22',
    'title': "Green Line on Your Samsung Screen? What It Means and How It's Fixed",
    'desc': "A green or pink line on a Galaxy screen means the display panel has failed. Here's why, and why we fit genuine Samsung service screens on the S series.",
